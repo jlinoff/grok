@@ -338,13 +338,12 @@ func matchFileName(opts cliOptions, path string) (match bool) {
 	// If only include patterns were defined, then exclude this file.
 	// If only exclude patterns were defined, then include this file.
 	// If both were defined, reject the file.
-	ip := len(opts.IncludeAndPatterns) > 0 || len(opts.IncludeOrPatterns) > 0
-	if ip == false {
-		// No include patterns, always match.
-		match = true
-	} else {
+	if len(opts.IncludeAndPatterns) > 0 || len(opts.IncludeOrPatterns) > 0 {
 		// Include patterns specified, never match.
 		match = false
+	} else {
+		// No include patterns, always match.
+		match = true
 	}
 	return
 }
