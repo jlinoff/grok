@@ -1,0 +1,12 @@
+2017/02/14 06:39:16 INFO       31 - version: grok v0.2
+2017/02/14 06:39:16 INFO       32 - cmdline: ../bin/grok -s -v -l -a test05 -e test05-include test05-exclude.txt test05-include.txt test05.txt
+test05.txt
+       1 | test05.txt
+test05-exclude.txt
+       1 | test05-exclude.txt
+
+summary: files tested :        2
+summary: files matched:        2
+2017/02/14 06:39:16 INFO       58 - files tested:         2
+2017/02/14 06:39:16 INFO       59 - files matched:        2
+2017/02/14 06:39:16 INFO       60 - done
