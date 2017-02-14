@@ -3,7 +3,7 @@ Go program that searches directory trees for files that match regular expression
 It uses parallelism via goroutines to improve performance.
 
 ## Installation
-Here is how you install it. You must `go` in your path.
+Here is how you install it. You must have `go` and `make` in your path.
 
 ```bash
 $ cd ~/work
