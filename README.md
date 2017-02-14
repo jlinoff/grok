@@ -95,13 +95,13 @@ files that have been modified in the last week you would specify `-n 1w` or
 
  The table below lists the suffixes.
  
- | Suffix | Duration | Example  |
- | :----: | -------- | -------- |
- | s      | seconds  | `-n 30s` |
- | m      | minutes  | `-n 20m` |
- | h      | hours    | `-n 12h` |
- | d      | days     | `-n 3d`  |
- | w      | weeks    | `-n 2w`  
+| Suffix | Duration | Example  |
+| :----: | -------- | -------- |
+| s      | seconds  | `-n 30s` |
+| m      | minutes  | `-n 20m` |
+| h      | hours    | `-n 12h` |
+| d      | days     | `-n 3d`  |
+| w      | weeks    | `-n 2w`  |
  
 If no suffix is specified, seconds are assumed.
 
