@@ -1,6 +1,25 @@
 # grok
 Go program that searches directory trees for files that match regular expressions.
 
+## Installation
+Here is how you install it. You must `go` in your path.
+
+```bash
+$ cd ~/work
+$ git clone https://github.com/jlinoff/grok.git
+$ cd grok
+$ make
+```
+
+Now you can test it by going to a project directory and running it.
+
+```bash
+$ cd ~/projects/myproject
+$ ~/work/grok/bin/grok -l -s -a `\bmain\b` .
+```
+
+For detailed information about the available options, use the `-h` option.
+
 ## Overview
 I developed this tool to allow me to find symbols in files in directory trees
 reasonably quickly which helps me grok the structure of the source code.
@@ -89,3 +108,9 @@ You can search time windows by using both options. Here is an example that
 shows how to search files that are newer than 4 weeks but older than 2 weeks: `-n 4w -o 2w`.
 
 This is very useful when you only want to search a specific time window.
+
+## Epilogue
+I hope that you find this tool as useful as I have.
+
+Comments or suggestions for improving/fixing it are greatly appreciated.
+
