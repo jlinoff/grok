@@ -468,7 +468,7 @@ EXAMPLES
         -i '\.[ch]$|\.java$|\.py$' tool1/src tool1/include tool2/src tool2/include
 
     # Example 4: Find all source files that have main and reference a macro
-    #            called FOOBAR
+    #            called FOOBAR.
     $ %[1]v \
         -s \
         -l \
