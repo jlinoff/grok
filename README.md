@@ -1,5 +1,6 @@
 # grok
-Go program that searches directory trees for files that match regular expressions.
+Go program that searches directory trees for files that match regular expressions. 
+It uses parallelism via goroutines to improve performance.
 
 ## Installation
 Here is how you install it. You must `go` in your path.
