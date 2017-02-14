@@ -11,7 +11,7 @@ import (
 )
 
 // program version
-var version = "v0.2"
+var version = "v0.3"
 
 // Local reporting stats
 type findStats struct {
@@ -64,11 +64,6 @@ func main() {
 func walk(opts cliOptions, path string, fs *findStats, depth int) {
 	infov2(opts, "checking: %v %v '%v'", depth, opts.MaxDepth, path)
 	if opts.MaxDepth >= 0 && depth > opts.MaxDepth {
-		return
-	}
-
-	// Test the include/exclude and/or patterns.
-	if matchFileName(opts, path) == false {
 		return
 	}
 
