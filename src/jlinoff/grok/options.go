@@ -12,9 +12,6 @@ import (
 	"time"
 )
 
-// program version
-var version = "v0.1"
-
 // datetime
 type cliDatetime struct {
 	Re    *regexp.Regexp

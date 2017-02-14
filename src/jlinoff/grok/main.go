@@ -10,6 +10,9 @@ import (
 	"sync"
 )
 
+// program version
+var version = "v0.2"
+
 // Local reporting stats
 type findStats struct {
 	FilesTested  int64
@@ -158,32 +161,37 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 	fileRejected := false
 	fileAllAndAccepted := false
 	fileAnyOrAccepted := len(opts.AcceptAndPatterns) > 0
+	aa1 := false // accept any for an AND condition (partial match)
 
 	for i, line := range lines {
-		aa1, aa2 := checkAndConditions(line, opts.AcceptAndPatterns, &aa, true)
-		ra1, _ := checkAndConditions(line, opts.RejectAndPatterns, &ra, false)
-		ao1 := checkOrConditions(line, opts.AcceptOrPatterns, len(opts.AcceptAndPatterns) == 0)
-		ro1 := checkOrConditions(line, opts.RejectOrPatterns, false)
+		ra1, _ := checkAndConditions(line, opts.RejectAndPatterns, &ra)
+		ro1 := checkOrConditions(line, opts.RejectOrPatterns)
 
-		fileAllAndAccepted = aa1
+		// Any rejection, aborts.
+		if ra1 == true || ro1 == true {
+			fileRejected = true
+			break
+		}
+
+		// Now see if the line is accepted.
+		// That can occur for a partial match on the AND conditions or
+		// any match for the OR conditions.
+		fileAllAndAccepted, aa1 = checkAndConditions(line, opts.AcceptAndPatterns, &aa)
+		ao1 := checkOrConditions(line, opts.AcceptOrPatterns)
 		if fileAnyOrAccepted == false {
 			fileAnyOrAccepted = ao1
 		}
 
-		if aa2 == true || ao1 == true {
+		// Any partial matches are collected for later.
+		if aa1 == true || ao1 == true {
 			if len(line) > 0 {
 				matchedLines = append(matchedLines, i)
 			}
 		}
-
-		if ra1 == true && ro1 == true {
-			fileRejected = true
-			break
-		}
 	}
 
 	matched := false
-	if fileRejected == false && fileAllAndAccepted == true && fileAnyOrAccepted {
+	if fileRejected == false && (fileAllAndAccepted == true || fileAnyOrAccepted) {
 		mutex.Lock()
 		matched = true
 		fs.FilesMatched++
@@ -226,7 +234,7 @@ func readLines(opts cliOptions, path string) (lines []string) {
 }
 
 // checkOrCondition, return True if anything matches.
-func checkOrConditions(data string, ps []*regexp.Regexp, zero bool) (matchedAny bool) {
+func checkOrConditions(data string, ps []*regexp.Regexp) (matchedAny bool) {
 	if len(ps) > 0 {
 		for _, p := range ps {
 			if p.MatchString(data) {
@@ -235,13 +243,13 @@ func checkOrConditions(data string, ps []*regexp.Regexp, zero bool) (matchedAny 
 			}
 		}
 	} else {
-		matchedAny = zero
+		matchedAny = false
 	}
 	return
 }
 
 // checkAndCondition, return true if everything matches
-func checkAndConditions(data string, ps []*regexp.Regexp, array *[]bool, zero bool) (matchedAll bool, matchedAny bool) {
+func checkAndConditions(data string, ps []*regexp.Regexp, array *[]bool) (matchedAll bool, matchedAny bool) {
 	if len(ps) > 0 {
 		n := 0
 		for i, p := range ps {
@@ -259,7 +267,7 @@ func checkAndConditions(data string, ps []*regexp.Regexp, array *[]bool, zero bo
 			matchedAll = true
 		}
 	} else {
-		matchedAll = zero
+		matchedAll = false
 		matchedAny = false
 	}
 	return
@@ -269,24 +277,21 @@ func checkAndConditions(data string, ps []*regexp.Regexp, array *[]bool, zero bo
 // criteria.
 func matchFileName(opts cliOptions, path string) (match bool) {
 	var p *regexp.Regexp
-	match = true
 
-	// All of the include AND patterns must match.
-	// If they do not, then match is false unless
-	// overridden by the OR conditions.
-	// If they all match, we cannot accept this
-	// file until the rejections are processed.
-	if len(opts.IncludeAndPatterns) > 0 {
-		for _, p = range opts.IncludeAndPatterns {
-			if p.MatchString(path) == false {
-				match = false
-				break
+	// Exclude rules have priority.
+	// If a valid exclude is found, it overrides the include rules.
+	match = false
+
+	// Any of the exclude OR patterns must match to exclude this file.
+	if len(opts.ExcludeOrPatterns) > 0 {
+		for _, p := range opts.ExcludeOrPatterns {
+			if p.MatchString(path) == true {
+				return
 			}
 		}
 	}
 
-	// All of the exclude AND patterns must not match.
-	// If they all match, reject this file.
+	// All of the exclude AND patterns must match to exclude this file.
 	if len(opts.ExcludeAndPatterns) > 0 {
 		all := true
 		for _, p = range opts.ExcludeAndPatterns {
@@ -297,37 +302,51 @@ func matchFileName(opts cliOptions, path string) (match bool) {
 		}
 		if all {
 			// Any rejection short circuits the logic.
-			match = false
 			return
 		}
 	}
 
-	// At this point we, we know that the AND patterns tell us that it is a
-	// match.
+	// At this point there are no explicit rejections
+	// but we need to check for explicit includes.
+	match = true
+
+	// Any of the include OR patterns must match to include this file.
 	if len(opts.IncludeOrPatterns) > 0 {
-		if match == false {
-			for _, p := range opts.IncludeOrPatterns {
-				if p.MatchString(path) == true {
-					// found a match but we can't stop until the OR exclude patterns
-					// are checked.
-					match = true
-					break
-				}
-			}
-		}
-	}
-
-	if match == true {
-		// See if there any grounds for rejection.
-		for _, p := range opts.ExcludeOrPatterns {
+		for _, p = range opts.IncludeOrPatterns {
 			if p.MatchString(path) == true {
-				match = false
-				break // short circuit is fine here
+				return
 			}
 		}
 	}
 
-	return match
+	// All of the include AND patterns must match to include this file.
+	if len(opts.IncludeAndPatterns) > 0 {
+		all := true
+		for _, p = range opts.IncludeAndPatterns {
+			if p.MatchString(path) == false {
+				all = false
+				break
+			}
+		}
+		if all {
+			return
+		}
+	}
+
+	// If we made it to this point, no patterns were matched so
+	// we apply a heuristic.
+	// If only include patterns were defined, then exclude this file.
+	// If only exclude patterns were defined, then include this file.
+	// If both were defined, reject the file.
+	ip := len(opts.IncludeAndPatterns) > 0 || len(opts.IncludeOrPatterns) > 0
+	if ip == false {
+		// No include patterns, always match.
+		match = true
+	} else {
+		// Include patterns specified, never match.
+		match = false
+	}
+	return
 }
 
 // matches
