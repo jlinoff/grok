@@ -173,15 +173,14 @@ Use `-l` to show the matching lines in the files.
 Use `-A` to make sure that all of the patterns occur in the same file to designate a match.
 
 ### Example 5
-Find which files use a constant called FOOBAT_SPAM.
+Find which files use a constant called FOOBAT_SPAM. Ignore generated files.
 
 ```bash
 $ grok \
    -s \
    -l \
    -a '\bFOOBAR_SPAM\b` \
-   -e '\.log$|\.tmp$|\.o$|\.py[co]' \
-   -e `\.tmp$`
+   -e '\.log$|\.tmp$|\.o$|\.py[co]'
 ```
 
 Use `-a` to specify the word to search for.
