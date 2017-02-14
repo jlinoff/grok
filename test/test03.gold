@@ -1,0 +1,8 @@
+2017/02/13 18:32:13 INFO       28 - version: grok v0.1
+2017/02/13 18:32:13 INFO       29 - cmdline: ../bin/grok -s -v -l -e '.*\.log$' -e /test/ -e /tmp/ -A '\bmain\b' -A '\bFOOBARSPAM\b' ..
+
+summary: files tested :       35
+summary: files matched:        0
+2017/02/13 18:32:13 INFO       55 - files tested:        35
+2017/02/13 18:32:13 INFO       56 - files matched:        0
+2017/02/13 18:32:13 INFO       57 - done
