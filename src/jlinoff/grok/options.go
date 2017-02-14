@@ -475,6 +475,14 @@ EXAMPLES
         -i '\.[ch]$|\.java$|\.py$' tool1/src tool1/include tool2/src tool2/include \
         -A '\bmain\b' -A '\bFOOBAR\b'
 
+    # Example 5: Find which files use a constant called FOOBAT_SPAM.
+    #            Ignore generated files.
+    $ %[1]v \
+        -s \
+       -l \
+       -a '\bFOOBAR_SPAM\b \
+       -e '\.log$|\.tmp$|\.o$|\.py[co]'
+
 COPYRIGHT:
    Copyright (c) 2017 Joe Linoff, all rights reserved
 
