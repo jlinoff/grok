@@ -136,6 +136,8 @@ $ grok \
     tool1/src tool1/include tool2/src tool2/include
 ```
 
+Use `-s` to print a summary.
+
 Use `-r` to reject files with the valid copyright notice.
 
 Use `-i` to define the files to search.
@@ -169,6 +171,22 @@ $ grok \
 Use `-l` to show the matching lines in the files.
 
 Use `-A` to make sure that all of the patterns occur in the same file to designate a match.
+
+### Example 5
+Find which files use a constant called FOOBAT_SPAM.
+
+```bash
+$ grok \
+   -s \
+   -l \
+   -a '\bFOOBAR_SPAM\b` \
+   -e '\.log$|\.tmp$|\.o$|\.py[co]' \
+   -e `\.tmp$`
+```
+
+Use `-a` to specify the word to search for.
+
+Use `-e` to exclude .log, .tmp, .o, .pyc and .pyo files.
 
 ## Epilogue
 I hope that you find this tool as useful as I have.
