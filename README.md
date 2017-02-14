@@ -81,7 +81,7 @@ The `-s` tells the program to print the summary statistics.
 The `-r` says to reject any file that contains the valid copyright notice so
 that we only print the ones with the valid copyright notice.
 
-The -i says to only include the files that have the specified extensions.
+The `-i` says to only include the files that have the specified extensions.
 
 The regular expression syntax is the same used by go. It is described here:
 https://github.com/google/re2/wiki/Syntax.
@@ -109,6 +109,66 @@ You can search time windows by using both options. Here is an example that
 shows how to search files that are newer than 4 weeks but older than 2 weeks: `-n 4w -o 2w`.
 
 This is very useful when you only want to search a specific time window.
+
+## Examples
+This section shows a few more examples that will help you understand how to use the tool.
+Note that for most general searches, you will primarily use the `-a` option to match contents
+along with the `-e` option to skip log files, tmp files, etc.
+
+### Example 1
+Get help.
+
+```bash
+$ grok -h
+```
+
+### Example 2
+Search the current directory tree for C, java and python files
+that do not have a specific copyright notice.
+Note that we reject files that contain the valid copyright
+notice so that we can fix the ones that don't have it.
+
+```bash
+$ grok \
+    -s \
+    -r 'Copyright (c) ([0-9]{4}\s*[,-]\s*)*[0-9]{4} by Acme Inc., all rights reserved' \
+    -i '\.[ch]$|\.java$|\.py$' \
+    tool1/src tool1/include tool2/src tool2/include
+```
+
+Use `-r` to reject files with the valid copyright notice.
+
+Use `-i` to define the files to search.
+
+### Example 3
+Same as the previous search but only look at files that have
+changed in the past 4 weeks.
+
+```bash
+$ grok \
+   -n 4w \
+   -s \
+   -r 'Copyright (c) ([0-9]{4}\s*[,-]\s*)*[0-9]{4} by Acme Inc., all rights reserved' \
+   -i '\.[ch]$|\.java$|\.py$' \
+   tool1/src tool1/include tool2/src tool2/include
+```
+
+Use `-n` to specify that we only want to look at files newer than 4 weeks.
+
+### Example 4
+Find all source files that have main and reference a macro called FOOBAR.
+
+```bash
+$ grok \
+    -s \
+    -l \
+    -i '\.[ch]$|\.java$|\.py$' tool1/src tool1/include tool2/src tool2/include \
+    -A '\bmain\b' -A '\bFOOBAR\b'
+```
+
+Use `-l` to show the matching lines in the files.
+
+Use `-A` to make sure that all of the patterns occur in the same file to designate a match.
 
 ## Epilogue
 I hope that you find this tool as useful as I have.
