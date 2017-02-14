@@ -39,7 +39,7 @@ bundle:
 		--exclude='\.git' \
 		$(PROJECTS) \
 		test/*.sh test/*.gold \
-		Makefile
+		Makefile LICENSE README.md
 	@ls -l $$(basename $$(pwd))-src.tar.xz
 
 edit:
