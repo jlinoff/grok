@@ -38,6 +38,7 @@ type cliOptions struct {
 	NewerThanFlag      bool
 	OlderThan          time.Time //-o
 	OlderThanFlag      bool
+	PruneOrPatterns    []*regexp.Regexp // -p
 	RejectAndPatterns  []*regexp.Regexp // -R
 	RejectOrPatterns   []*regexp.Regexp // -r
 	Summary            bool             // -s
@@ -88,6 +89,8 @@ func loadCliOptions() (opts cliOptions) {
 		case "-o", "--olderthan-than":
 			opts.OlderThanFlag = true
 			opts.OlderThan = cliGetNextArgDatetime(&i, arg)
+		case "-p", "--prune":
+			opts.PruneOrPatterns = append(opts.PruneOrPatterns, cliGetNextArgRegexp(&i, arg))
 		case "-r", "--reject":
 			opts.RejectOrPatterns = append(opts.RejectOrPatterns, cliGetNextArgRegexp(&i, arg))
 		case "-R", "--Reject", "--REJECT":
@@ -233,9 +236,11 @@ DESCRIPTION
     You can specify whether to keep a file based on whether the file name
     matches or does not match a set of regular expressions, whether the file is
     older or newer than a date or whether the file content matches or does not
-    match regular expressions. You can also limit the search by directory depth.
+    match regular expressions. You can also limit the search by directory depth
+    or directory path name.
 
-    These ideas are summarized in the following table.
+    These ideas are summarized in the following table. The term REs refers to
+    regular expressions.
 
         Test        Target     Action
         ==========  =========  =============================================
@@ -249,6 +254,7 @@ DESCRIPTION
         older       date/time  Accept a file if it is older than a date/time.
 
         maxdepth    depth      Exclude files deeper than the depth.
+        prune       name       Exclude a directory if the path matched REs.
 
     You can specify whether a file must match all criteria (AND) or any criteria
     (OR). In the table above, you can see that with the options that are lower
@@ -414,6 +420,15 @@ OPTIONS
                        been modified in the last week:
                            $ %[1]v -n 1w
 
+    -p REGEXP, --prunt REGEXP
+                       Prune a directory if the path matches the regular
+                       expression. By default all directories are searched.
+                       The prune option can be used to significantly speed up
+                       analysis. It is typically used to ignore git repositories
+                       or directories that contain generated files like lib, bin
+                       or tmp. Here is an example:
+                           $ %[1]v -p '\.git$|/lib$|/bin$|/tmp$'
+
     -r REGEXP, --reject REGEXP
                        Reject if the contents match the regular expression.
                        If multiple reject criterion are specified, only one of
@@ -451,34 +466,34 @@ EXAMPLES
     #            that do not have a specific copyright notice.
     #            Note that we reject files that contain the valid copyright
     #            notice so that we can fix the ones that don't have it.
-    $ %[1]v \
-        -s \
+    $ %[1]v -s \
         -r 'Copyright (c) ([0-9]{4}\s*[,-]\s*)*[0-9]{4} by Acme Inc., all rights reserved' \
         -i '\.[ch]$|\.java$|\.py$' tool1/src tool1/include tool2/src tool2/include
 
     # Example 3: Same as the previous search but only look at files that have
     #            changed in the past 4 weeks.
-    $ %[1]v \
-        -n 4w \
-        -s \
+    $ %[1]v -n 4w -s \
         -r 'Copyright (c) ([0-9]{4}\s*[,-]\s*)*[0-9]{4} by Acme Inc., all rights reserved' \
         -i '\.[ch]$|\.java$|\.py$' tool1/src tool1/include tool2/src tool2/include
 
     # Example 4: Find all source files that have main and reference a macro
     #            called FOOBAR.
-    $ %[1]v \
-        -s \
-        -l \
+    $ %[1]v -s -l \
         -i '\.[ch]$|\.java$|\.py$' tool1/src tool1/include tool2/src tool2/include \
         -A '\bmain\b' -A '\bFOOBAR\b'
 
     # Example 5: Find which files use a constant called FOOBAT_SPAM.
     #            Ignore generated files.
-    $ %[1]v \
-        -s \
-       -l \
+    $ %[1]v -s -l \
        -a '\bFOOBAR_SPAM\b \
        -e '\.log$|\.tmp$|\.o$|\.py[co]'
+
+    # Example 6: Find which files use a constant called FOOBAT_SPAM.
+    #            gnore generated files and prune generated directories.
+    $ %[1]v -s -l \
+       -a '\bFOOBAR_SPAM\b \
+       -e '\.log$|\.tmp$|\.o$|\.py[co]' \
+       -p '\.git$|/lib$|/bin$|/tmp$'
 
 COPYRIGHT:
    Copyright (c) 2017 Joe Linoff, all rights reserved

@@ -77,6 +77,11 @@ func walk(opts cliOptions, path string, fs *findStats, depth int) {
 	}
 
 	if stat.IsDir() {
+		if pruneDir(opts, path) {
+			infov2(opts, "pruning '%v'", path)
+			return
+		}
+
 		entries, err := ioutil.ReadDir(path)
 		if err != nil {
 			warning(opts, "cannot read directory: '%v' - %v", path, err)
@@ -100,6 +105,18 @@ func walk(opts cliOptions, path string, fs *findStats, depth int) {
 	} else {
 		checkFileParallel(opts, path, stat, fs)
 	}
+}
+
+// pruneDir returns true if the directory path should be pruned.
+func pruneDir(opts cliOptions, path string) bool {
+	if len(opts.PruneOrPatterns) > 0 {
+		for _, p := range opts.PruneOrPatterns {
+			if p.MatchString(path) {
+				return true // match was found, prune it
+			}
+		}
+	}
+	return false // by default all directories are accepted
 }
 
 // checkFileParallel sets up the channel for parallel execution
@@ -155,12 +172,17 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 	matchedLines := []int{}
 	fileRejected := false
 	fileAllAndAccepted := false
-	fileAnyOrAccepted := len(opts.AcceptAndPatterns) > 0
-	aa1 := false // accept any for an AND condition (partial match)
+	fileAnyOrAccepted := false
+	var aa1 bool // accept any for an AND condition (partial match)
 
 	for i, line := range lines {
+		infov3(opts, "line: %04d %v : %v", i+1, path, line)
+		// Check reject patterns.
 		ra1, _ := checkAndConditions(line, opts.RejectAndPatterns, &ra)
 		ro1 := checkOrConditions(line, opts.RejectOrPatterns)
+
+		infov3(opts, "   reject all : %v", ra1)
+		infov3(opts, "   reject any : %v", ro1)
 
 		// Any rejection, aborts.
 		if ra1 == true || ro1 == true {
@@ -168,14 +190,20 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 			break
 		}
 
-		// Now see if the line is accepted.
+		// Check accept patterns.
 		// That can occur for a partial match on the AND conditions or
 		// any match for the OR conditions.
 		fileAllAndAccepted, aa1 = checkAndConditions(line, opts.AcceptAndPatterns, &aa)
 		ao1 := checkOrConditions(line, opts.AcceptOrPatterns)
+
+		infov3(opts, "   accept all : %v", fileAllAndAccepted)
+		infov3(opts, "   accept any : %v %v", ao1, aa1)
 		if fileAnyOrAccepted == false {
 			fileAnyOrAccepted = ao1
 		}
+
+		infov3(opts, "   fileAnyOrAccepted  : %v", fileAnyOrAccepted)
+		infov3(opts, "   fileAllAndAccepted : %v", fileAllAndAccepted)
 
 		// Any partial matches are collected for later.
 		if aa1 == true || ao1 == true {
