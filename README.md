@@ -131,10 +131,11 @@ Search the current directory tree for C, java and python files
 that do not have a specific copyright notice.
 Note that we reject files that contain the valid copyright
 notice so that we can fix the ones that don't have it.
+Prune directories that contain generated files or repository files.
 
 ```bash
-$ grok \
-    -s \
+$ grok -s \
+    -p '\.git$|lib$|bin$|tmp$' \
     -r 'Copyright (c) ([0-9]{4}\s*[,-]\s*)*[0-9]{4} by Acme Inc., all rights reserved' \
     -i '\.[ch]$|\.java$|\.py$' \
     tool1/src tool1/include tool2/src tool2/include
@@ -149,11 +150,11 @@ Use `-i` to define the files to search.
 ### Example 3
 Same as the previous search but only look at files that have
 changed in the past 4 weeks.
+Prune directories that contain generated files or repository files.
 
 ```bash
-$ grok \
-   -n 4w \
-   -s \
+$ grok -n 4w -s \
+   -p '\.git$|lib$|bin$|tmp$' \
    -r 'Copyright (c) ([0-9]{4}\s*[,-]\s*)*[0-9]{4} by Acme Inc., all rights reserved' \
    -i '\.[ch]$|\.java$|\.py$' \
    tool1/src tool1/include tool2/src tool2/include
@@ -163,11 +164,11 @@ Use `-n` to specify that we only want to look at files newer than 4 weeks.
 
 ### Example 4
 Find all source files that have main and reference a macro called FOOBAR.
+Prune directories that contain generated files or repository files.
 
 ```bash
-$ grok \
-    -s \
-    -l \
+$ grok -s -l \
+    -p '\.git$|lib$|bin$|tmp$' \
     -i '\.[ch]$|\.java$|\.py$' tool1/src tool1/include tool2/src tool2/include \
     -A '\bmain\b' -A '\bFOOBAR\b'
 ```
@@ -178,11 +179,11 @@ Use `-A` to make sure that all of the patterns occur in the same file to designa
 
 ### Example 5
 Find which files use a constant called FOOBAT_SPAM. Ignore generated files.
+Prune directories that contain generated files or repository files.
 
 ```bash
-$ grok \
-   -s \
-   -l \
+$ grok -s -l \
+   -p '\.git$|lib$|bin$|tmp$' \
    -a '\bFOOBAR_SPAM\b` \
    -e '\.log$|\.tmp$|\.o$|\.py[co]'
 ```
