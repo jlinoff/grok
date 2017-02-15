@@ -11,12 +11,13 @@ import (
 )
 
 // program version
-var version = "v0.4"
+var version = "v0.5"
 
 // Local reporting stats
 type findStats struct {
 	FilesTested  int64
 	FilesMatched int64
+	LinesMatched int64
 }
 
 // Locking semaphore for printing.
@@ -53,10 +54,12 @@ func main() {
 		fmt.Println("")
 		fmt.Printf("summary: files tested : %8s\n", commaize(fs.FilesTested))
 		fmt.Printf("summary: files matched: %8s\n", commaize(fs.FilesMatched))
+		fmt.Printf("summary: lines matched: %8s\n", commaize(fs.LinesMatched))
 	}
 
 	infov(opts, "files tested:  %8s", commaize(fs.FilesTested))
 	infov(opts, "files matched: %8s", commaize(fs.FilesMatched))
+	infov(opts, "lines matched: %8s", commaize(fs.LinesMatched))
 	infov(opts, "done")
 }
 
@@ -218,6 +221,7 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 		mutex.Lock()
 		matched = true
 		fs.FilesMatched++
+		fs.LinesMatched += int64(len(matchedLines))
 		fmt.Printf("%v\n", path)
 		if opts.Lines {
 			for _, i := range matchedLines {

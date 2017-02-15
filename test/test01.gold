@@ -1,11 +1,13 @@
-2017/02/13 18:26:35 INFO       28 - version: grok v0.1
-2017/02/13 18:26:35 INFO       29 - cmdline: ../bin/grok -l -v -s -a test-utils test01.sh
+2017/02/15 12:34:08 INFO       32 - version: grok v0.4
+2017/02/15 12:34:08 INFO       33 - cmdline: ../bin/grok -l -v -s -a test-utils test01.sh
 test01.sh
       10 | source $Location/test-utils.sh
       12 | $PUT -l -v -s -a 'test-utils' test01.sh
 
 summary: files tested :        1
 summary: files matched:        1
-2017/02/13 18:26:35 INFO       55 - files tested:         1
-2017/02/13 18:26:35 INFO       56 - files matched:        1
-2017/02/13 18:26:35 INFO       57 - done
+summary: lines matched:        2
+2017/02/15 12:34:08 INFO       60 - files tested:         1
+2017/02/15 12:34:08 INFO       61 - files matched:        1
+2017/02/15 12:34:08 INFO       62 - lines matched:        2
+2017/02/15 12:34:08 INFO       63 - done

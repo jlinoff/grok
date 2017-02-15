@@ -1,10 +1,12 @@
-2017/02/15 08:00:59 INFO       31 - version: grok v0.3
-2017/02/15 08:00:59 INFO       32 - cmdline: ../bin/grok -M 1 -s -v -l -e '\.gold$|\.filter$|log$' -p '/src$|/tmp$|\.git$' -A '\bmain\b' -A '\bFOOBARSPAM\b' ..
+2017/02/15 12:35:22 INFO       32 - version: grok v0.4
+2017/02/15 12:35:22 INFO       33 - cmdline: ../bin/grok -M 1 -s -v -l -e '\.gold$|\.filter$|log$' -p '/src$|/tmp$|\.git$' -A '\bmain\b' -A '\bFOOBARSPAM\b' ..
 ../test/test03.sh
        4 | # Look for main
        5 | # and FOOBARSPAM in this project.
 
-summary: files tested :       45
+summary: files tested :       37
 summary: files matched:        1
-2017/02/15 08:00:59 INFO       59 - files matched:        1
-2017/02/15 08:00:59 INFO       60 - done
+summary: lines matched:        2
+2017/02/15 12:35:22 INFO       61 - files matched:        1
+2017/02/15 12:35:22 INFO       62 - lines matched:        2
+2017/02/15 12:35:22 INFO       63 - done
