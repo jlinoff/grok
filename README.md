@@ -39,7 +39,8 @@ matches or does not match a set of regular expressions, whether the file is
 older or newer than a date or whether the file content matches or does not
 match regular expressions. You can also limit the search by directory depth.
 
-These ideas are summarized in the following table.
+These ideas are summarized in the following table. The term REs refers to
+regular expressions.
 
 | #   | Test     | Target    | Options  | Action |
 | --: | -------- | --------- | -------- | ------ |
@@ -50,6 +51,7 @@ These ideas are summarized in the following table.
 | 5   | newer    | date/time | -n       | Accept a file if it is newer than a date/time. |
 | 6   | older    | date/time | -o       | Accept a file if it is older than a date/time. |
 | 7   | maxdepth | depth     | -m       | Exclude files deeper than the depth. |
+| 8   | prune    | name      | -p       | Exclude a directory if the path matched REs. |
 
 You can specify whether a file must match all criteria (AND) or any criteria
 (OR). In the table above, you can see that with the options that are lower and upper case.
