@@ -49,18 +49,25 @@ for t in $(ls -1 test[0-9][0-9]*.sh) ; do
     # Filter out the date info.
     DiffLog=$Test.difflog
     
+    #
     cat $Test.log | \
         sed -E \
+            -e 's@^[ ]+[0-9]+ \| @  LINENO \| @' \
+            -e 's@INFO[ ]+[0-9]+ -@INFO  LINENO -@' \
             -e 's@^[0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+:[0-9]+@YYYY/MM/DD hh:mm:ss@' \
-            -e 's@INFO[ ]+([0-9]+)@INFO  LINENO@' | \
-            grep -v 'summary: files tested : ' | \
-            > $Test.log.filter
+        | \
+        grep -v 'summary: files tested : ' | \
+        grep -v 'version: grok' \
+             > $Test.log.filter
     cat $Test.gold | \
         sed -E \
+            -e 's@^[ ]+[0-9]+ \| @  LINENO \| @' \
+            -e 's@INFO[ ]+[0-9]+ -@INFO  LINENO -@' \
             -e 's@^[0-9]+/[0-9]+/[0-9]+ [0-9]+:[0-9]+:[0-9]+@YYYY/MM/DD hh:mm:ss@' \
-            -e 's@INFO[ ]+([0-9]+)@INFO  LINENO@' | \
-            grep -v 'summary: files tested : ' | \
-            > $Test.gold.filter
+        | \
+        grep -v 'summary: files tested : ' | \
+        grep -v 'version: grok' \
+             > $Test.gold.filter
 
     diff $Test.log.filter $Test.gold.filter > $DiffLog 2>&1
     st=$?

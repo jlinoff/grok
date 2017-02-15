@@ -11,5 +11,5 @@
 Location="$(cd $(dirname $0) && pwd)"
 source $Location/test-utils.sh
 
-$PUT -s -v -l -e '.*\.log$' -e '/test/' -e '/tmp/' -A '\bmain\b' -A '\bFOOBARSPAM\b' ..
+$PUT -M 1 -s -v -l -e '\.gold$|\.filter$|log$' -p '/src$|/tmp$|\.git$' -A '\bmain\b' -A '\bFOOBARSPAM\b' .. 2>&1 | grep -v ' - files tested: '
 
