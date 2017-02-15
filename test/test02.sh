@@ -3,6 +3,8 @@
 # A more complex example.
 # Look for main in this project.
 #
+# Use -M 1 to make it deterministic.
+#
 
 # ================================================================
 # Includes
@@ -10,5 +12,5 @@
 Location="$(cd $(dirname $0) && pwd)"
 source $Location/test-utils.sh
 
-$PUT -s -v -l -e '.*\.log$' -p '/test$|/tmp$|\.git$' -a '\bmain\b' ..
+$PUT -M 1 -s -v -l -e '.*\.log$' -p '/test$|/tmp$|\.git$' -a '\bmain\b' .. 2>&1 | grep -v ' - files tested: '
 
