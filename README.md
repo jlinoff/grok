@@ -216,8 +216,8 @@ $ grep '^  ' /tmp/opt.log | sed -e 's@.*/opt/@/opt/@' | awk -F/ '{if (NF > 2) {p
 ```
 
 Note that the /tmp/opt.log file is not strictly necessary. You could simply pipe the
-results in the grep command sequence but I normally use a log file to refine the
-filtering.
+results in the grep command sequence but I normally use a log file to allow me to refine
+the filtering.
 
 ## Epilogue
 I hope that you find this tool as useful as I have.
