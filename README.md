@@ -192,6 +192,33 @@ Use `-a` to specify the word to search for.
 
 Use `-e` to exclude .log, .tmp, .o, .pyc and .pyo files.
 
+### Example 6
+Search the current directory tree to find all references to packages in /opt.
+
+1. Ignore references to /opt/mystuff because we know that those are valid.
+2. Ignore generated files in lib, bin, tmp and log directories.
+3. Ignore the .git repository.
+4. Ignore log and tmp files.
+
+```bash
+$ grok -W -s -l \
+    -p '^\.git$|lib$|bin$|tmp$|log$' \
+    -e '\.log$|~$|\.tmp$' \
+    -r '/opt/mystuff' \
+    -a '/opt/' \
+    > /tmp/opt.log 2>&1
+$ # Now generate the report.
+$ grep '^  ' /tmp/opt.log | sed -e 's@.*/opt/@/opt/@' | awk -F/ '{if (NF > 2) {printf("/%s/%s\n",$2,$3)}}' | grep -v '/opt/$' | sort -fu | cat -n
+     1	/opt/boost
+     2	/opt/gcc
+     3  /opt/macports
+     4  /opt/openssl
+```
+
+Note that the /tmp/opt.log file is not strictly necessary. You could simply pipe the
+results in the grep command sequence but I normally use a log file to refine the
+filtering.
+
 ## Epilogue
 I hope that you find this tool as useful as I have.
 
