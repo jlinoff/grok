@@ -57,44 +57,44 @@ func loadCliOptions() (opts cliOptions) {
 		arg := os.Args[i]
 		switch arg {
 		case "-a", "--accept":
-			opts.AcceptOrPatterns = append(opts.AcceptOrPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.AcceptOrPatterns = append(opts.AcceptOrPatterns, cliGetNextArgRegexp(&i))
 		case "-A", "--Accept", "--ACCEPT":
-			opts.AcceptAndPatterns = append(opts.AcceptAndPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.AcceptAndPatterns = append(opts.AcceptAndPatterns, cliGetNextArgRegexp(&i))
 		case "-b", "--binary":
 			opts.Binary = true
 		case "-B", "--binary-size":
-			opts.BinarySize = cliGetNextArgInt(&i, arg)
+			opts.BinarySize = cliGetNextArgInt(&i)
 		case "-e", "--exclude":
-			opts.ExcludeOrPatterns = append(opts.ExcludeOrPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.ExcludeOrPatterns = append(opts.ExcludeOrPatterns, cliGetNextArgRegexp(&i))
 		case "-E", "--Exclude", "--EXCLUDE":
-			opts.ExcludeAndPatterns = append(opts.ExcludeAndPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.ExcludeAndPatterns = append(opts.ExcludeAndPatterns, cliGetNextArgRegexp(&i))
 		case "-h", "--help":
 			help()
 		case "-i", "--include":
-			opts.IncludeOrPatterns = append(opts.IncludeOrPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.IncludeOrPatterns = append(opts.IncludeOrPatterns, cliGetNextArgRegexp(&i))
 		case "-I", "--Include", "--INCLUDE":
-			opts.IncludeAndPatterns = append(opts.IncludeAndPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.IncludeAndPatterns = append(opts.IncludeAndPatterns, cliGetNextArgRegexp(&i))
 		case "-l", "--lines":
 			opts.Lines = true
 		case "-m", "--max-depth":
-			opts.MaxDepth = cliGetNextArgInt(&i, arg)
+			opts.MaxDepth = cliGetNextArgInt(&i)
 		case "-M", "--max-jobs":
-			opts.MaxJobs = cliGetNextArgInt(&i, arg)
+			opts.MaxJobs = cliGetNextArgInt(&i)
 			if opts.MaxJobs < 1 {
 				opts.MaxJobs = 1
 			}
 		case "-n", "--newer-than":
 			opts.NewerThanFlag = true
-			opts.NewerThan = cliGetNextArgDatetime(&i, arg)
+			opts.NewerThan = cliGetNextArgDatetime(&i)
 		case "-o", "--olderthan-than":
 			opts.OlderThanFlag = true
-			opts.OlderThan = cliGetNextArgDatetime(&i, arg)
+			opts.OlderThan = cliGetNextArgDatetime(&i)
 		case "-p", "--prune":
-			opts.PruneOrPatterns = append(opts.PruneOrPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.PruneOrPatterns = append(opts.PruneOrPatterns, cliGetNextArgRegexp(&i))
 		case "-r", "--reject":
-			opts.RejectOrPatterns = append(opts.RejectOrPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.RejectOrPatterns = append(opts.RejectOrPatterns, cliGetNextArgRegexp(&i))
 		case "-R", "--Reject", "--REJECT":
-			opts.RejectAndPatterns = append(opts.RejectAndPatterns, cliGetNextArgRegexp(&i, arg))
+			opts.RejectAndPatterns = append(opts.RejectAndPatterns, cliGetNextArgRegexp(&i))
 		case "-s", "--summary":
 			opts.Summary = true
 		case "-v", "--verbose":
@@ -129,8 +129,22 @@ func loadCliOptions() (opts cliOptions) {
 	return
 }
 
+// cliGetNextArgOutfile opens an output file.
+/*
+func cliGetNextArgOutfile(i *int) *os.File {
+	j := *i
+	f := cliGetNextArg(i)
+	fp, err := os.Create(f)
+	if err != nil {
+		fatal("error for option %v: %v", os.Args[j], err)
+	}
+	return fp
+}
+*/
+
 // cliGetNextArgDatetime
-func cliGetNextArgDatetime(i *int, opt string) time.Time {
+func cliGetNextArgDatetime(i *int) time.Time {
+	j := *i
 	now := time.Now()
 	arg := cliGetNextArg(i)
 
@@ -156,36 +170,38 @@ func cliGetNextArgDatetime(i *int, opt string) time.Time {
 	}
 
 	// Not found.
-	fatal("invalid date format for %v: '%v'", opt, arg)
+	fatal("invalid date format for %v: '%v'", os.Args[j], arg)
 	return now
 }
 
 // cliGetNextArgRegexp
-func cliGetNextArgRegexp(i *int, opt string) *regexp.Regexp {
+func cliGetNextArgRegexp(i *int) *regexp.Regexp {
+	j := *i
 	arg := cliGetNextArg(i)
 	re, err := regexp.Compile(arg)
 	if err != nil {
-		fatal("could not compile regexp for %v: %v", opt, err)
+		fatal("could not compile regexp for %v: %v", os.Args[j], err)
 	}
 	return re
 }
 
 // cliGetNextArgInt
-func cliGetNextArgInt(i *int, opt string) int {
+func cliGetNextArgInt(i *int) int {
+	j := *i
 	arg := cliGetNextArg(i)
 	val, err := strconv.Atoi(arg)
 	if err != nil {
-		fatal("not an integer for %v: %v", opt, arg)
+		fatal("not an integer for %v: %v", os.Args[j], arg)
 	}
 	return val
 }
 
 // cliGetNextArg gets the next command line argument.
 func cliGetNextArg(i *int) string {
-	opt := os.Args[*i]
+	j := *i
 	*i++
 	if *i >= len(os.Args) {
-		fatal("missing argument for option %v", opt)
+		fatal("missing argument for option %v", os.Args[j])
 	}
 	return os.Args[*i]
 }
