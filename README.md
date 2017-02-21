@@ -83,7 +83,7 @@ No directory was specified so the current directory tree will be searched to the
 The `-s` tells the program to print the summary statistics.
 
 The `-r` says to reject any file that contains the valid copyright notice so
-that we only print the ones with the valid copyright notice.
+that we only print the ones _without_ the valid copyright notice.
 
 The `-i` says to only include the files that have the specified extensions.
 
