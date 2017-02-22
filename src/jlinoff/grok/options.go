@@ -102,7 +102,7 @@ func loadCliOptions() (opts cliOptions) {
 		case "-vv", "-vvv", "-vvvv":
 			opts.Verbose += len(arg) - 1
 		case "-V", "--version":
-			fmt.Printf("%v\n", version)
+			fmt.Printf("%v version %v\n", filepath.Base(os.Args[0]), version)
 			os.Exit(0)
 		case "-W", "--no-warnings":
 			opts.Warnings = false
