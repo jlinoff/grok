@@ -512,11 +512,11 @@ EXAMPLES
        -p '\.git$|/lib$|/bin$|/tmp$'
 
     # Example 7: Find which files use constants called foobar_spam and
-    #            wombat_zoo in a case-insensitive manner. Note that the (\?i)
+    #            wombat_zoo in a case-insensitive manner. Note that the (?i)
     #            applies to all of the OR alternatives.
     #            Ignore generated files and prune generated directories.
     $ %[1]v -s -l \
-       -a '(\?i)\bfoobar_spam\b|\bwombat_zoo\b' \
+       -a '(?i)\bfoobar_spam\b|\bwombat_zoo\b' \
        -e '\.log$|\.tmp$|\.o$|\.py[co]' \
        -p '\.git$|/lib$|/bin$|/tmp$'
 
