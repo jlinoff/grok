@@ -215,7 +215,7 @@ $ grep '^  ' /tmp/opt.log | sed -e 's@.*/opt/@/opt/@' | awk -F/ '{if (NF > 2) {p
      4  /opt/openssl
 ```
 
-Note that the /tmp/opt.log file is not strictly necessary. You could simply pipe the
+Note that the `/tmp/opt.log` file is not strictly necessary. You could simply pipe the
 results in the grep command sequence but I normally use a log file to allow me to refine
 the filtering.
 
