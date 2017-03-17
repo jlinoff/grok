@@ -38,7 +38,7 @@ bundle:
 	$(TAR_EXE) -J -c -f $$(basename $$(pwd))-src.tar.xz \
 		--exclude='\.git' \
 		$(PROJECTS) \
-		test/*.sh test/*.gold \
+		test/*.sh test/*.gold test/*.conf \
 		Makefile LICENSE README.md
 	@ls -l $$(basename $$(pwd))-src.tar.xz
 
