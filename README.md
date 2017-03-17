@@ -239,7 +239,7 @@ $ cat >my.conf <<EOF
 # Always print the summary report.
 -s
 EOF
-$ grok -c myconf.conf -a '\bFOO_BAR_SPAM\b'
+$ grok -c myconf.conf -a '\bFOO_BAR_SPAM\b' -l
 ```
 
 ## Epilogue
