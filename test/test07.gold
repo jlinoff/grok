@@ -1,0 +1,12 @@
+2017/03/17 16:21:49 INFO       32 - version: grok v0.5.2
+2017/03/17 16:21:49 INFO       33 - cmdline: ../bin/grok -c test07.conf test07.sh
+test07.sh
+      10 | source $Location/test-utils.sh
+
+summary: files tested :        1
+summary: files matched:        1
+summary: lines matched:        1
+2017/03/17 16:21:49 INFO       60 - files tested:         1
+2017/03/17 16:21:49 INFO       61 - files matched:        1
+2017/03/17 16:21:49 INFO       62 - lines matched:        1
+2017/03/17 16:21:49 INFO       63 - done
