@@ -220,7 +220,7 @@ results in the grep command sequence but I normally use a log file to allow me t
 the filtering.
 
 ### Example 7
-Put common options in a conf file (v0.5.2 or later).
+Put common options in a conf file (v0.6.0 or later).
 
 The conf file recognizes one option with an optional argument per line. Blank lines, white space only lines and lines starting
 with `#` as the first non-whitespace character are ignored. Nest references to the same conf file are detected and will cause a fatal
