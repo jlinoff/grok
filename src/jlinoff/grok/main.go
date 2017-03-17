@@ -11,7 +11,7 @@ import (
 )
 
 // program version
-var version = "v0.5.1"
+var version = "v0.5.2"
 
 // Local reporting stats
 type findStats struct {
@@ -248,14 +248,12 @@ func readLines(opts cliOptions, path string) (lines []string) {
 		return
 	}
 	defer file.Close()
-
-	reader := bufio.NewReader(file)
-	for {
-		line, err := reader.ReadString('\n')
-		lines = append(lines, line)
-		if err != nil {
-			break // EOF
-		}
+	s := bufio.NewScanner(file)
+	for s.Scan() {
+		lines = append(lines, s.Text())
+	}
+	if err := s.Err(); err != nil {
+		warning(opts, "scanner error: %v", err)
 	}
 	return
 }
