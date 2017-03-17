@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -53,48 +54,57 @@ func loadCliOptions() (opts cliOptions) {
 	opts.CmdLine = cliCmdLine()
 	opts.Warnings = true
 	opts.MaxJobs = runtime.NumCPU()
-	for i := 1; i < len(os.Args); i++ {
-		arg := os.Args[i]
+
+	// Used to detect nested conf files.
+	confMap := map[string]string{}
+
+	// Make a local copy of the arguments because we have to modify
+	// it.
+	args := append([]string{}, os.Args...)
+	for i := 1; i < len(args); i++ {
+		arg := args[i]
 		switch arg {
 		case "-a", "--accept":
-			opts.AcceptOrPatterns = append(opts.AcceptOrPatterns, cliGetNextArgRegexp(&i))
+			opts.AcceptOrPatterns = append(opts.AcceptOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-A", "--Accept", "--ACCEPT":
-			opts.AcceptAndPatterns = append(opts.AcceptAndPatterns, cliGetNextArgRegexp(&i))
+			opts.AcceptAndPatterns = append(opts.AcceptAndPatterns, cliGetNextArgRegexp(&i, args))
 		case "-b", "--binary":
 			opts.Binary = true
 		case "-B", "--binary-size":
-			opts.BinarySize = cliGetNextArgInt(&i)
+			opts.BinarySize = cliGetNextArgInt(&i, args)
+		case "-c", "--conf":
+			readOptsConfFile(&i, &args, confMap)
 		case "-e", "--exclude":
-			opts.ExcludeOrPatterns = append(opts.ExcludeOrPatterns, cliGetNextArgRegexp(&i))
+			opts.ExcludeOrPatterns = append(opts.ExcludeOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-E", "--Exclude", "--EXCLUDE":
-			opts.ExcludeAndPatterns = append(opts.ExcludeAndPatterns, cliGetNextArgRegexp(&i))
+			opts.ExcludeAndPatterns = append(opts.ExcludeAndPatterns, cliGetNextArgRegexp(&i, args))
 		case "-h", "--help":
 			help()
 		case "-i", "--include":
-			opts.IncludeOrPatterns = append(opts.IncludeOrPatterns, cliGetNextArgRegexp(&i))
+			opts.IncludeOrPatterns = append(opts.IncludeOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-I", "--Include", "--INCLUDE":
-			opts.IncludeAndPatterns = append(opts.IncludeAndPatterns, cliGetNextArgRegexp(&i))
+			opts.IncludeAndPatterns = append(opts.IncludeAndPatterns, cliGetNextArgRegexp(&i, args))
 		case "-l", "--lines":
 			opts.Lines = true
 		case "-m", "--max-depth":
-			opts.MaxDepth = cliGetNextArgInt(&i)
+			opts.MaxDepth = cliGetNextArgInt(&i, args)
 		case "-M", "--max-jobs":
-			opts.MaxJobs = cliGetNextArgInt(&i)
+			opts.MaxJobs = cliGetNextArgInt(&i, args)
 			if opts.MaxJobs < 1 {
 				opts.MaxJobs = 1
 			}
 		case "-n", "--newer-than":
 			opts.NewerThanFlag = true
-			opts.NewerThan = cliGetNextArgDatetime(&i)
+			opts.NewerThan = cliGetNextArgDatetime(&i, args)
 		case "-o", "--olderthan-than":
 			opts.OlderThanFlag = true
-			opts.OlderThan = cliGetNextArgDatetime(&i)
+			opts.OlderThan = cliGetNextArgDatetime(&i, args)
 		case "-p", "--prune":
-			opts.PruneOrPatterns = append(opts.PruneOrPatterns, cliGetNextArgRegexp(&i))
+			opts.PruneOrPatterns = append(opts.PruneOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-r", "--reject":
-			opts.RejectOrPatterns = append(opts.RejectOrPatterns, cliGetNextArgRegexp(&i))
+			opts.RejectOrPatterns = append(opts.RejectOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-R", "--Reject", "--REJECT":
-			opts.RejectAndPatterns = append(opts.RejectAndPatterns, cliGetNextArgRegexp(&i))
+			opts.RejectAndPatterns = append(opts.RejectAndPatterns, cliGetNextArgRegexp(&i, args))
 		case "-s", "--summary":
 			opts.Summary = true
 		case "-v", "--verbose":
@@ -129,24 +139,11 @@ func loadCliOptions() (opts cliOptions) {
 	return
 }
 
-// cliGetNextArgOutfile opens an output file.
-/*
-func cliGetNextArgOutfile(i *int) *os.File {
-	j := *i
-	f := cliGetNextArg(i)
-	fp, err := os.Create(f)
-	if err != nil {
-		fatal("error for option %v: %v", os.Args[j], err)
-	}
-	return fp
-}
-*/
-
 // cliGetNextArgDatetime
-func cliGetNextArgDatetime(i *int) time.Time {
+func cliGetNextArgDatetime(i *int, args []string) time.Time {
 	j := *i
 	now := time.Now()
-	arg := cliGetNextArg(i)
+	arg := cliGetNextArg(i, args)
 
 	// Map of valid arguments.
 	// This could easily be simple static structure but since this is a rare
@@ -170,64 +167,132 @@ func cliGetNextArgDatetime(i *int) time.Time {
 	}
 
 	// Not found.
-	fatal("invalid date format for %v: '%v'", os.Args[j], arg)
+	fatal("invalid date format for %v: '%v'", args[j], arg)
 	return now
 }
 
 // cliGetNextArgRegexp
-func cliGetNextArgRegexp(i *int) *regexp.Regexp {
+func cliGetNextArgRegexp(i *int, args []string) *regexp.Regexp {
 	j := *i
-	arg := cliGetNextArg(i)
+	arg := cliGetNextArg(i, args)
 	re, err := regexp.Compile(arg)
 	if err != nil {
-		fatal("could not compile regexp for %v: %v", os.Args[j], err)
+		fatal("could not compile regexp for %v: %v", args[j], err)
 	}
 	return re
 }
 
 // cliGetNextArgInt
-func cliGetNextArgInt(i *int) int {
+func cliGetNextArgInt(i *int, args []string) int {
 	j := *i
-	arg := cliGetNextArg(i)
+	arg := cliGetNextArg(i, args)
 	val, err := strconv.Atoi(arg)
 	if err != nil {
-		fatal("not an integer for %v: %v", os.Args[j], arg)
+		fatal("not an integer for %v: %v", args[j], arg)
 	}
 	return val
 }
 
 // cliGetNextArg gets the next command line argument.
-func cliGetNextArg(i *int) string {
+func cliGetNextArg(i *int, args []string) string {
 	j := *i
 	*i++
-	if *i >= len(os.Args) {
-		fatal("missing argument for option %v", os.Args[j])
+	if *i >= len(args) {
+		fatal("missing argument for option %v", args[j])
 	}
-	return os.Args[*i]
+	return args[*i]
+}
+
+// quoteString
+func quote(arg string) (result string) {
+	result = arg
+	qs := []string{" ", "\t", "\"", "'", "\\", "$", "*", "+", "^"}
+	for _, x := range qs {
+		if strings.Index(arg, x) >= 0 {
+			// Quote it			arg = strings.Replace(arg, "'", "\\'", -1)
+			result = "'" + arg + "'"
+			break
+		}
+	}
+	return
 }
 
 // get the command line
 func cliCmdLine() (cli string) {
 	cli = os.Args[0]
-	qs := []string{" ", "\t", "\"", "'", "\\", "$", "*", "+", "^"}
 	for i := 1; i < len(os.Args); i++ {
 		arg := os.Args[i]
 		cli += " "
-		q := false
-		for _, x := range qs {
-			if strings.Index(arg, x) >= 0 {
-				q = true
-				break
-			}
-		}
-		if q {
-			arg = strings.Replace(arg, "'", "\\'", -1)
-			cli += "'" + arg + "'"
-		} else {
-			cli += arg
-		}
+		cli += quote(arg)
 	}
 	return
+}
+
+// getCanonicalPath
+func getCanonicalPath(path string) string {
+	s, e := filepath.EvalSymlinks(path)
+	if e != nil {
+		fatal("%v", e)
+	}
+	a, e := filepath.Abs(s)
+	if e != nil {
+		fatal("%v", e)
+	}
+	return a
+}
+
+// readOptsConfFile - reads the options configuration file and inserts them
+// into the args array.
+func readOptsConfFile(i *int, args *[]string, confMap map[string]string) {
+	conf := cliGetNextArg(i, *args) // conf file path
+	newargs := []string{}
+	path := getCanonicalPath(conf)
+	if _, found := confMap[path]; found {
+		// It was found! This could be an infinite recursive descent.
+		fatal("nested reference to file '%v' found in conf file '%v'", conf, confMap[path])
+	}
+	confMap[path] = conf
+	ifp, err := os.Open(conf)
+	if err != nil {
+		fatal("conf file read failed %v: %v", conf, err)
+	}
+	defer ifp.Close()
+	s := bufio.NewScanner(ifp)
+	for s.Scan() {
+		line := strings.Trim(s.Text(), " \t")
+		if len(line) == 0 || line[0] == '#' {
+			// skip blank lines and lines that start with #.
+			continue
+		}
+		// Split on the first white space.
+		// Keep the rest intact.
+		// Examples --arg "foo bar  spam"
+		// want: ["--arg", "foo bar  spam"]
+		flds := strings.Fields(line) // ignore all white space
+		opt := flds[0]               // this is the option
+		newargs = append(newargs, opt)
+
+		// Now get the rest of the line
+		// This assumes that all options have, at most, a single argument.
+		arg := line[len(opt):]
+		arg = strings.Trim(arg, " \t")
+		if len(arg) > 0 {
+			if len(arg) > 1 && arg[0] == arg[len(arg)-1] {
+				if arg[0] == '"' || arg[0] == '\'' {
+					arg = arg[1 : len(arg)-1] // trim the leading and trailing quotes
+				}
+			}
+			newargs = append(newargs, arg)
+		}
+	}
+	if err := s.Err(); err != nil {
+		fatal("conf file read failed: %v: %v", conf, err)
+	}
+
+	// Update the slice by reference.
+	if len(newargs) > 0 {
+		*args = append((*args)[:*i+1], append(newargs, (*args)[*i+1:]...)...)
+	}
 }
 
 func help() {
@@ -363,6 +428,25 @@ OPTIONS
                        Number of bytes to read to determine whether this is a
                        binary file.
                        The default is 512.
+
+    -c CONF, --conf CONF
+                       Read a conf file and insert the arguments directly into
+                       the command line. This is convenient for storing and
+                       re-using common options. The syntax is simple, each
+                       line is a single option. Blank lines and lines that
+                       start with a hash are ignore. Here is an example that
+                       prunes .git and .repo files:
+
+                           # Common options to prune common directories and
+                           # disable warnings.
+                           -p '\.git$|\.repo$'
+                           -W
+
+                       When this file is read, it is exactly like specifying
+                       those options on the command line.
+
+                       Nested conf files can be specified but the program aborts
+                       if it finds nested references to the same conf file.
 
     -e REGEXP, --exclude REGEXP
                        Exclude file if the name matches the regular expression.
