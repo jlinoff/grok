@@ -219,6 +219,29 @@ Note that the `/tmp/opt.log` file is not strictly necessary. You could simply pi
 results in the grep command sequence but I normally use a log file to allow me to refine
 the filtering.
 
+### Example 7
+Put common options in a conf file (v0.5.2 or later).
+
+The conf file recognizes one option with an optional argument per line. Blank lines, white space only lines and lines starting
+with `#` as the first non-whitespace character are ignored. Nest references to the same conf file are detected and will cause a fatal
+error to avoid infinite recursion.
+
+```
+$ cat >my.conf <<EOF
+# Common options
+# Prune git, repo source code control subdirectories.
+# Prune the bin directory that only has generated files.
+-p '\.git$|\.repo$|bin$'
+
+# Ignore warnings.
+-W
+
+# Always print the summary report.
+-s
+EOF
+$ grok -c myconf.conf -a '\bFOO_BAR_SPAM\b'
+```
+
 ## Epilogue
 I hope that you find this tool as useful as I have.
 
