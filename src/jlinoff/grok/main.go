@@ -11,7 +11,7 @@ import (
 )
 
 // program version
-var version = "v0.6.0"
+var version = "v0.6.1"
 
 // Local reporting stats
 type findStats struct {

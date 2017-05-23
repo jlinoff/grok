@@ -520,7 +520,7 @@ OPTIONS
                        been modified in the last week:
                            $ %[1]v -n 1w
 
-    -p REGEXP, --prunt REGEXP
+    -p REGEXP, --prune REGEXP
                        Prune a directory if the path matches the regular
                        expression. By default all directories are searched.
                        The prune option can be used to significantly speed up
