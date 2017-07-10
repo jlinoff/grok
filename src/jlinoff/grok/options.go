@@ -454,7 +454,7 @@ OPTIONS
                        them has to match (an OR operation).
                        Here is an example that will exclude a file if its name
                        contains either foo or bar:
-                           $ %[1]v -i foo -i bar
+                           $ %[1]v -e foo -e bar
 
     -E REGEXP, --Exclude REGEXP
                        Exclude file if the name matches the regular expression.
@@ -462,7 +462,7 @@ OPTIONS
                        have to match (an AND operation).
                        Here is an example that will exclude a file if its name
                        contains both foo and bar:
-                           $ %[1]v -i foo -i bar
+                           $ %[1]v -E foo -E bar
                            test/fooonly
                            test/baronly
 
@@ -518,7 +518,7 @@ OPTIONS
                        section for more details.
                        Here is an example that looks for files that have not
                        been modified in the last week:
-                           $ %[1]v -n 1w
+                           $ %[1]v -o 1w
 
     -p REGEXP, --prune REGEXP
                        Prune a directory if the path matches the regular
