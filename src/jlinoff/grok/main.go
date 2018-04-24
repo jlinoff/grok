@@ -11,7 +11,7 @@ import (
 )
 
 // program version
-var version = "v0.6.1"
+var version = "v0.7.0"
 
 // Local reporting stats
 type findStats struct {
@@ -178,8 +178,11 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 	fileAnyOrAccepted := false
 	var aa1 bool // accept any for an AND condition (partial match)
 
+	before := make([][]string, 0)
+	after := make([][]string, 0)
 	for i, line := range lines {
 		infov3(opts, "line: %04d %v : %v", i+1, path, line)
+
 		// Check reject patterns.
 		ra1, _ := checkAndConditions(line, opts.RejectAndPatterns, &ra)
 		ro1 := checkOrConditions(line, opts.RejectOrPatterns)
@@ -212,6 +215,29 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 		if aa1 == true || ao1 == true {
 			if len(line) > 0 {
 				matchedLines = append(matchedLines, i)
+
+				// Before context.
+				if opts.Before > 0 {
+					var context []string
+					for k := i - opts.Before; k < i; k++ {
+						if k >= 0 {
+							context = append(context, lines[k])
+						}
+					}
+					before = append(before, context)
+				}
+
+				// After context.
+				if opts.After > 0 {
+					var context []string
+					for k := i - opts.After; k < i; k++ {
+						if k >= 0 {
+							context = append(context, lines[k])
+						}
+					}
+					after = append(after, context)
+				}
+
 			}
 		}
 	}
@@ -222,14 +248,57 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 		matched = true
 		fs.FilesMatched++
 		fs.LinesMatched += int64(len(matchedLines))
-		fmt.Printf("%v\n", path)
+		if opts.Colorize {
+			fmt.Printf("\033[1m%v\033[0m\n", path)
+		} else {
+			fmt.Printf("%v\n", path)
+		}
 		if opts.Lines {
-			for _, i := range matchedLines {
+			for m, i := range matchedLines {
 				lineno := i + 1
 				line := lines[i]
-				fmt.Printf("%8d | %v", lineno, line)
-				if line[len(line)-1] != '\n' {
-					fmt.Println("")
+
+				// Before
+				if opts.Before > 0 {
+					if opts.Colorize {
+						fmt.Printf("%8s \033[38;5;245m|----------------------------------------------------------------\033[0m\n", "")
+						for _, c := range before[m] {
+							fmt.Printf("\033[38;5;245m%8s |-%v\033[0m", "", c)
+							printNewline(c)
+						}
+					} else {
+						fmt.Printf("%8s |----------------------------------------------------------------\n", "")
+						for _, c := range before[m] {
+							fmt.Printf("%8s |-%v", "", c)
+							printNewline(c)
+						}
+					}
+				}
+
+				// Line.
+				if opts.Colorize {
+					fmt.Printf("\033[38;5;245m%8d | \033[0m %v", lineno, colorizeLine(opts, line))
+					printNewline(line)
+				} else {
+					fmt.Printf("%8d | %v", lineno, line)
+					printNewline(line)
+				}
+
+				// After.
+				if opts.After > 0 {
+					if opts.Colorize {
+						for _, c := range after[m] {
+							fmt.Printf("\033[38;5;245m%8s |+%v\033[0m", "", c)
+							printNewline(c)
+						}
+						fmt.Printf("%8s \033[38;5;245m|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\033[0m\n", "")
+					} else {
+						for _, c := range after[m] {
+							fmt.Printf("%8s |+%v", "", c)
+							printNewline(c)
+						}
+						fmt.Printf("%8s |++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n", "")
+					}
 				}
 			}
 		}
@@ -238,6 +307,39 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 
 	infov2(opts, "read %v lines, %v bytes, matched=%v", len(lines), stat.Size(), matched)
 	return
+}
+
+// printNewline prints a new line if it is needed.
+func printNewline(line string) {
+	if len(line) == 0 {
+		fmt.Printf("\n")
+	} else if line[len(line)-1] != '\n' {
+		fmt.Printf("\n")
+	}
+}
+
+// colorizeLine colorizes a line.
+func colorizeLine(opts cliOptions, line string) string {
+	// At this point we know that we have a match.
+	// TODO: find the longest match.
+	// For now, just grab the first match.
+	// opts.AcceptAndPatterns
+	// opts.AcceptOrPatterns
+	if len(opts.AcceptOrPatterns) > 0 {
+		for _, re := range opts.AcceptOrPatterns {
+			line = re.ReplaceAllStringFunc(line, func(arg1 string) string {
+				return "\033[31;1m" + arg1 + "\033[0m"
+			})
+		}
+	}
+	if len(opts.AcceptAndPatterns) > 0 {
+		for _, re := range opts.AcceptAndPatterns {
+			line = re.ReplaceAllStringFunc(line, func(arg1 string) string {
+				return "\033[31;1m" + arg1 + "\033[0m"
+			})
+		}
+	}
+	return line
 }
 
 // Read the lines from the file.

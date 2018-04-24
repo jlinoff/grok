@@ -24,9 +24,12 @@ type cliDatetime struct {
 type cliOptions struct {
 	AcceptAndPatterns  []*regexp.Regexp // -A
 	AcceptOrPatterns   []*regexp.Regexp // -a
+	After              int              // after
+	Before             int              // before
 	Binary             bool             // -b
 	BinarySize         int              // -B
 	CmdLine            string
+	Colorize           bool // --color
 	Dirs               []string
 	ExcludeAndPatterns []*regexp.Regexp // -E
 	ExcludeOrPatterns  []*regexp.Regexp // -i
@@ -50,7 +53,7 @@ type cliOptions struct {
 func loadCliOptions() (opts cliOptions) {
 	opts.Verbose = 0
 	opts.MaxDepth = -1 // all files
-	opts.BinarySize = 512
+	opts.BinarySize = 1024
 	opts.CmdLine = cliCmdLine()
 	opts.Warnings = true
 	opts.MaxJobs = runtime.NumCPU()
@@ -60,20 +63,43 @@ func loadCliOptions() (opts cliOptions) {
 
 	// Make a local copy of the arguments because we have to modify
 	// it.
+	cache := make([]string, 0)
 	args := append([]string{}, os.Args...)
 	for i := 1; i < len(args); i++ {
 		arg := args[i]
+		if len(cache) > 0 {
+			// There are still single arguments in the cache,
+			// handle them first.
+			i--            // backup for the next round.
+			arg = cache[0] // populate arg from the cache
+			cache = cache[1:]
+		} else if len(arg) > 2 && arg[0] == '-' && arg[1] != '-' {
+			// Update the cache.
+			// This allows spefications like:
+			//   -CWla 'pattern'
+			for j := 2; j < len(arg); j++ {
+				newArg := fmt.Sprintf("-%c", arg[j])
+				cache = append(cache, newArg)
+			}
+			arg = arg[:2] // grab the first option
+		}
 		switch arg {
 		case "-a", "--accept":
 			opts.AcceptOrPatterns = append(opts.AcceptOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-A", "--Accept", "--ACCEPT":
 			opts.AcceptAndPatterns = append(opts.AcceptAndPatterns, cliGetNextArgRegexp(&i, args))
+		case "-y", "--after":
+			opts.After = cliGetNextArgInt(&i, args)
+		case "-z", "--before":
+			opts.Before = cliGetNextArgInt(&i, args)
 		case "-b", "--binary":
 			opts.Binary = true
 		case "-B", "--binary-size":
 			opts.BinarySize = cliGetNextArgInt(&i, args)
 		case "-c", "--conf":
 			readOptsConfFile(&i, &args, confMap)
+		case "-C", "--color", "--colorize":
+			opts.Colorize = true
 		case "-e", "--exclude":
 			opts.ExcludeOrPatterns = append(opts.ExcludeOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-E", "--Exclude", "--EXCLUDE":
@@ -421,6 +447,12 @@ OPTIONS
                            $ %[1]v -A foo -A bar .
                            test/foobar
 
+    --after NUM, -z NUM
+                       Print NUM lines after the match.
+
+    --before NUM, -y NUM
+                       Print NUM lines before the match.
+
     -b, --binary       Search binary files.
                        By default binary files are skipped.
 
@@ -465,6 +497,8 @@ OPTIONS
                            $ %[1]v -E foo -E bar
                            test/fooonly
                            test/baronly
+
+    --color            Colorize the output using ANSI escape sequences.
 
     -h, --help         On-line help.
 
@@ -603,6 +637,15 @@ EXAMPLES
        -a '(?i)\bfoobar_spam\b|\bwombat_zoo\b' \
        -e '\.log$|\.tmp$|\.o$|\.py[co]' \
        -p '\.git$|/lib$|/bin$|/tmp$'
+
+    # Example 8: Colorize the matches.
+    $ %[1]v -C -a 'class|struct' -W -l
+
+    # Example 9: Show before and after context.
+    $ %[1]v -C --before 1 --after 5 -a 'def foo.*$' -W -l
+
+    # Example 10: Colorize, before and after using shorthand.
+    $ %[1]v -CWLyza 1 5 'def foo.*$'
 
 COPYRIGHT:
    Copyright (c) 2017 Joe Linoff, all rights reserved

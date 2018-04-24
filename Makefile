@@ -22,15 +22,13 @@ install:
 		echo "" ; \
 		echo "GOPATH=$$(pwd) go $@ $(GO_PROJECT_DIR)/$$Project" ; \
 		GOPATH=$$(pwd) go $@ $(GO_PROJECT_DIR)/$$Project ; \
+		GOOS=darwin GOARCH=amd64 GOPATH=$$(pwd) go $@ $(GO_PROJECT_DIR)/$$Project ; \
+		GOOS=linux GOARCH=amd64 GOPATH=$$(pwd) go $@ $(GO_PROJECT_DIR)/$$Project ; \
 	done
 	@echo
 
 clean:
-	@for Project in $(GO_PROJECTS) ; do \
-		echo "GOPATH=$$(pwd) go $@ $(GO_PROJECT_DIR)/$$Project" ; \
-		GOPATH=$$(pwd) go $@ $(GO_PROJECT_DIR)/$$Project ; \
-	done
-	rm -rf test/*/test *log
+	rm -rf test/*/test *log bin
 	find . -name '*~' -delete
 	find . -name '*log' -delete
 
