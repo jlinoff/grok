@@ -242,6 +242,14 @@ EOF
 $ grok -c myconf.conf -a '\bFOO_BAR_SPAM\b' -l
 ```
 
+### Example 8
+Use some of the more interesting functions to colorize and add before/after context lines.
+```bash
+$ grok -CWlyza 5 4 'error:|fatal:' /foo/bar /spam/wombat/blatz
+```
+
+Note that `y` is the same as `--before` and `z` is the same `--after`. These options and `-C` were added in v0.7.0.
+
 ## Epilogue
 I hope that you find this tool as useful as I have.
 
