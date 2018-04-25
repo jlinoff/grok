@@ -26,7 +26,7 @@ install:
 		GOOS=linux GOARCH=amd64 GOPATH=$$(pwd) go $@ $(GO_PROJECT_DIR)/$$Project ; \
 	done
 	@# Make unique binary names for upload to github.
-	for goos in darwin linux ; do \
+	@for goos in darwin linux ; do \
 		if [ -f bin/$${goos}_amd64/grok ] ; then \
 			cp -v bin/$${goos}_amd64/grok bin/grok-$${goos}-amd64 ; \
 		else \

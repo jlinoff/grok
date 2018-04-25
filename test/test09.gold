@@ -1,12 +1,12 @@
 [1mtest09.txt[0m
          [38;5;245m|----------------------------------------------------------------[0m
-[38;5;245m       1 | [0m  [31;1mLorem ipsum dolor[0m sit amet, consectetur adipiscing elit. In ipsum
+[38;5;245m       1 | [0m [31;1mLorem ipsum dolor[0m sit amet, consectetur adipiscing elit. In ipsum
 [38;5;245m         |+ nisi, malesuada faucibus erat nec, tempor sollicitudin sapien. Nunc[0m
 [38;5;245m         |+ at lacinia ante. Morbi a orci eget quam convallis lobortis ut quis[0m
          [38;5;245m|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[0m
          [38;5;245m|----------------------------------------------------------------[0m
 [38;5;245m         |- Lorem ipsum dolor sit amet, consectetur adipiscing elit. In ipsum[0m
-[38;5;245m       2 | [0m  nisi, [31;1mmalesuada[0m faucibus erat nec, tempor sollicitudin sapien. Nunc
+[38;5;245m       2 | [0m nisi, [31;1mmalesuada[0m faucibus erat nec, tempor sollicitudin sapien. Nunc
 [38;5;245m         |+ at lacinia ante. Morbi a orci eget quam convallis lobortis ut quis[0m
 [38;5;245m         |+ nulla. Ut ornare, urna at aliquam vehicula, ligula enim dictum nisi,[0m
          [38;5;245m|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[0m
@@ -14,5 +14,5 @@
 [38;5;245m         |-at viverra felis. Suspendisse interdum ac massa eu eleifend. Vivamus[0m
 [38;5;245m         |-vehicula mi at augue vehicula, ut viverra tortor vulputate. Nullam[0m
 [38;5;245m         |-vestibulum dui eu felis molestie, at cursus ligula gravida. Nunc[0m
-[38;5;245m      21 | [0m [31;1mmalesuada[0m et elit eget sodales.
+[38;5;245m      21 | [0m[31;1mmalesuada[0m et elit eget sodales.
          [38;5;245m|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[0m
