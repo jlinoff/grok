@@ -11,7 +11,7 @@ import (
 )
 
 // program version
-var version = "v0.7.0"
+var version = "v0.8.0"
 
 // Local reporting stats
 type findStats struct {
@@ -219,7 +219,7 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 				// Before context.
 				if opts.Before > 0 {
 					var context []string
-					for k := i - opts.Before; k < i; k++ {
+					for k := i - opts.Before; k < i && k < len(lines); k++ {
 						if k >= 0 {
 							context = append(context, lines[k])
 						}
@@ -230,7 +230,7 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 				// After context.
 				if opts.After > 0 {
 					var context []string
-					for k := i - opts.After; k < i; k++ {
+					for k := i + 1; k < (i + opts.After) && k < len(lines); k++ {
 						if k >= 0 {
 							context = append(context, lines[k])
 						}
