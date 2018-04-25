@@ -88,9 +88,9 @@ func loadCliOptions() (opts cliOptions) {
 			opts.AcceptOrPatterns = append(opts.AcceptOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-A", "--Accept", "--ACCEPT":
 			opts.AcceptAndPatterns = append(opts.AcceptAndPatterns, cliGetNextArgRegexp(&i, args))
-		case "-y", "--after":
+		case "-z", "--after":
 			opts.After = cliGetNextArgInt(&i, args)
-		case "-z", "--before":
+		case "-y", "--before":
 			opts.Before = cliGetNextArgInt(&i, args)
 		case "-b", "--binary":
 			opts.Binary = true
