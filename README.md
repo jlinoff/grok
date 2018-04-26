@@ -57,6 +57,14 @@ regular expressions.
 You can specify whether a file must match all criteria (AND) or any criteria
 (OR). In the table above, you can see that with the options that are lower and upper case.
 
+You can also specify information to help you get some context information.
+
+| Short Option | Long Option | Description |
+| ------------ | ----------- | ----------- |
+| -C           | --color     | Colorize the regular expression matches. |
+| -y N         | --before N  | Print the N lines before the line that has a match. |
+| -z N         | --after N   | Print the N lines after the line that has a match. |
+
 A simple example should make all this a bit clearer. You want to search your
 python, java and C source files to see which ones do not have a copyright
 notice. The copy right notice has a very specific form:
