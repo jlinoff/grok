@@ -1,8 +1,9 @@
 # grok
 [![Releases](https://img.shields.io/github/release/jlinoff/grok.svg?style=flat)](https://github.com/jlinoff/grok/releases)
 
-Go program that searches directory trees for files that match regular expressions. 
-It uses concurrency to improve performance.
+Grep-like tool that searches for files that match regular expressions using concurrency to improve performance.
+
+Written in go.
 
 ## Installation
 Here is how you install it. You must have `go` and `make` in your path.
