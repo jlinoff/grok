@@ -561,7 +561,7 @@ OPTIONS
                        analysis. It is typically used to ignore git repositories
                        or directories that contain generated files like lib, bin
                        or tmp. Here is an example:
-                           $ %[1]v -p '\.git$|/lib$|/bin$|/tmp$'
+                           $ %[1]v -p '\.git$|^lib$|^bin$|^tmp$'
 
     -r REGEXP, --reject REGEXP
                        Reject if the contents match the regular expression.
@@ -627,7 +627,7 @@ EXAMPLES
     $ %[1]v -s -l \
        -a '\bFOOBAR_SPAM\b \
        -e '\.log$|\.tmp$|\.o$|\.py[co]' \
-       -p '\.git$|/lib$|/bin$|/tmp$'
+       -p '\.git$|^lib$|^bin$|^tmp$'
 
     # Example 7: Find which files use constants called foobar_spam and
     #            wombat_zoo in a case-insensitive manner. Note that the (?i)
@@ -636,7 +636,7 @@ EXAMPLES
     $ %[1]v -s -l \
        -a '(?i)\bfoobar_spam\b|\bwombat_zoo\b' \
        -e '\.log$|\.tmp$|\.o$|\.py[co]' \
-       -p '\.git$|/lib$|/bin$|/tmp$'
+       -p '\.git$|^lib$|^bin$|^tmp$'
 
     # Example 8: Colorize the matches.
     $ %[1]v -C -a 'class|struct' -W -l
