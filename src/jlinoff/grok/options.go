@@ -24,8 +24,8 @@ type cliDatetime struct {
 type cliOptions struct {
 	AcceptAndPatterns  []*regexp.Regexp // -A
 	AcceptOrPatterns   []*regexp.Regexp // -a
-	After              int              // after
-	Before             int              // before
+	After              int              // -x after
+	Before             int              // -y before
 	Binary             bool             // -b
 	BinarySize         int              // -B
 	CmdLine            string
@@ -45,6 +45,8 @@ type cliOptions struct {
 	PruneOrPatterns    []*regexp.Regexp // -p
 	RejectAndPatterns  []*regexp.Regexp // -R
 	RejectOrPatterns   []*regexp.Regexp // -r
+	ScanBufInitSize    int              // -S, --scan-buf-params
+	ScanBufMaxSize     int              // -S, --scan-buf-params
 	Summary            bool             // -s
 	Verbose            int              // -v
 	Warnings           bool             // --no-warnings
@@ -57,6 +59,8 @@ func loadCliOptions() (opts cliOptions) {
 	opts.CmdLine = cliCmdLine()
 	opts.Warnings = true
 	opts.MaxJobs = runtime.NumCPU()
+	opts.ScanBufInitSize = 1024 * 1024
+	opts.ScanBufMaxSize = 10 * opts.ScanBufInitSize
 
 	// Used to detect nested conf files.
 	confMap := map[string]string{}
@@ -133,6 +137,9 @@ func loadCliOptions() (opts cliOptions) {
 			opts.RejectAndPatterns = append(opts.RejectAndPatterns, cliGetNextArgRegexp(&i, args))
 		case "-s", "--summary":
 			opts.Summary = true
+		case "-S", "--scan-buf-params":
+			opts.ScanBufInitSize = cliGetNextArgInt(&i, args)
+			opts.ScanBufMaxSize = cliGetNextArgInt(&i, args)
 		case "-v", "--verbose":
 			opts.Verbose++
 		case "-vv", "-vvv", "-vvvv":
@@ -327,27 +334,30 @@ USAGE
     %[1]v [OPTIONS] [<DIRS>]
 
 DESCRIPTION
-    Go program that searches directory trees for files that match regular
-    expressions. It uses parallelism via goroutines to improve performance.
+    Searches directory trees for files that match regular expressions
+    using parallelism to improve performance. It is written in go.
 
-    It was developed to allow me to find symbols in files in directory trees
-    reasonably quickly which helps me grok the structure of the source code.
-    By default it searches in the current directory but you can explicitly
-    specify the directories or files that you want to search.
+    It was developed to allow me to find symbols in files in directory
+    trees reasonably quickly which helps me grok the structure of
+    the source code.  By default it searches in the current directory
+    but you can explicitly specify the directories or files that
+    you want to search.
 
     It is similar to doing a find/grep but the regular expressions
-    are more powerful, the file name appears before the file content and
-    multiple expressions can be search for simultaneously. Note that the search
-    capability is much less powerful than the capabilities provided by find.
+    are more powerful, the file name appears before the file content
+    and multiple expressions can be search for simultaneously. Note
+    that the search capability is much less powerful than the
+    capabilities provided by find.
 
-    You can specify whether to keep a file based on whether the file name
-    matches or does not match a set of regular expressions, whether the file is
-    older or newer than a date or whether the file content matches or does not
-    match regular expressions. You can also limit the search by directory depth
-    or directory path name.
+    You can specify whether to keep a file based on whether the
+    file name matches or does not match a set of regular expressions,
+    whether the file is older or newer than a date or whether the
+    file content matches or does not match regular expressions. You
+    can also limit the search by directory depth or directory path
+    name.
 
-    These ideas are summarized in the following table. The term REs refers to
-    regular expressions.
+    These ideas are summarized in the following table. The term REs
+    refers to regular expressions.
 
         Test        Target     Action
         ==========  =========  =============================================
@@ -363,22 +373,23 @@ DESCRIPTION
         maxdepth    depth      Exclude files deeper than the depth.
         prune       name       Exclude a directory if the path matched REs.
 
-    You can specify whether a file must match all criteria (AND) or any criteria
-    (OR). In the table above, you can see that with the options that are lower
-    and upper case.
+    You can specify whether a file must match all criteria (AND)
+    or any criteria (OR). In the table above, you can see that with
+    the options that are lower and upper case.
 
-    A simple example should make all this a bit clearer. You want to search your
-    python, java and C source files to see which ones do not have a copyright
-    notice. The copy right notice has a very specific form:
+    A simple example should make all this a bit clearer. You want
+    to search your python, java and C source files to see which
+    ones do not have a copyright notice. The copy right notice has
+    a very specific form:
 
         "Copyright (c) YEARS by Acme Inc., all rights reserved"
 
-    The YEARS is a list of years that is a comma or dash separated list of
-    years where each year is a 4 digit integer. This would be a valid list
-    of years: 2004-2015, 2017. Spaces are allowed.
+    The YEARS is a list of years that is a comma or dash separated
+    list of years where each year is a 4 digit integer. This would
+    be a valid list of years: 2004-2015, 2017. Spaces are allowed.
 
-    The C files have .c and .h extensions. The java files have a .java extension
-    and the python files have a .py extension.
+    The C files have .c and .h extensions. The java files have a
+    .java extension and the python files have a .py extension.
 
     Here is the %[1]v command you might use.
 
@@ -387,25 +398,27 @@ DESCRIPTION
             -r 'Copyright (c) ([0-9]{4}\s*[,-]\s*)*[0-9]{4} by Acme Inc., all rights reserved' \
             -i '\.[ch]$|\.java$|\.py$'
 
-    No directory was specified so the current directory tree will be searched
-    to the bottom.
+    No directory was specified so the current directory tree will
+    be searched to the bottom.
 
     The -s tells the program to print the summary statistics.
 
-    The -r says to reject any file that contains the valid copyright notice so
-    that we only print the ones with the valid copyright notice.
+    The -r says to reject any file that contains the valid copyright
+    notice so that we only print the ones with the valid copyright
+    notice.
 
-    The -i says to only include the files that have the specified extensions.
+    The -i says to only include the files that have the specified
+    extensions.
 
-    The regular expression syntax is the same used by go. It is described here:
-    https://github.com/google/re2/wiki/Syntax.
+    The regular expression syntax is the same used by go. It is
+    described here: https://github.com/google/re2/wiki/Syntax.
 
 DATE/TIME SPECIFICATION
-    The date/time specification is used by the -n and -o options to specify a
-    relative date time. A specification consists of a positive integer with a
-    suffix to indicate seconds, minutes, hours, days and weeks. To analyze all
-    files that have been modified in the last week you would specify -n 1w or
-    -n 7d.
+    The date/time specification is used by the -n and -o options
+    to specify a relative date time. A specification consists of a
+    positive integer with a suffix to indicate seconds, minutes,
+    hours, days and weeks. To analyze all files that have been
+    modified in the last week you would specify -n 1w or -n 7d.
 
     The table below lists the suffixes.
 
@@ -419,31 +432,39 @@ DATE/TIME SPECIFICATION
 
     If no suffix is specified, seconds are assumed.
 
-    You can search time windows by using both options. Here is an example that
-    shows how to search files that are newer than 4 weeks but older than 2 weeks:
+    You can search time windows by using both options. Here is an
+    example that shows how to search files that are newer than 4
+    weeks but older than 2 weeks:
 
         -n 4w -o 2w
 
-    This is very useful when you only want to search a specific time window.
+    This is very useful when you only want to search a specific
+    time window.
 
 OPTIONS
     -a REGEXP, --accept REGEXP
-                       Accept if the contents match the regular expression.
-                       If multiple accept criterion are specified, only one of
-                       them has to match (an OR operation).
-                       Here is an example that will accept a file if it contains
-                       either foo or bar:
+		       Accept if the contents match the regular
+		       expression.
+
+		       If multiple accept criterion are specified,
+		       only one of them has to match (an OR operation).
+
+		       Here is an example that will accept a file
+		       if it contains either foo or bar:
                            $ %[1]v -a foo -a bar  # same as -a 'foo|bar'
                            test/fooonly
                            test/baronly
                            test/foobar
 
     -A REGEXP, --Accept REGEXP
-                       Accept if the contents match the regular expression.
-                       If multiple accept criterion are specified, all of them
-                       have to match (an AND operation).
-                       Here is an example that will only accept a file if it
-                       contains both foo and bar:
+		       Accept if the contents match the regular
+		       expression.
+
+		       If multiple accept criterion are specified,
+		       all of them have to match (an AND operation).
+
+		       Here is an example that will only accept a
+		       file if it contains both foo and bar:
                            $ %[1]v -A foo -A bar .
                            test/foobar
 
@@ -457,43 +478,52 @@ OPTIONS
                        By default binary files are skipped.
 
     -B INT, --binary-size INT
-                       Number of bytes to read to determine whether this is a
-                       binary file.
+		       Number of bytes to read to determine whether
+		       this is a binary file.
                        The default is 512.
 
     -c CONF, --conf CONF
-                       Read a conf file and insert the arguments directly into
-                       the command line. This is convenient for storing and
-                       re-using common options. The syntax is simple, each
-                       line is a single option. Blank lines and lines that
-                       start with a hash are ignore. Here is an example that
-                       prunes .git and .repo files:
+		       Read a conf file and insert the arguments
+		       directly into the command line. This is
+		       convenient for storing and re-using common
+		       options. The syntax is simple, each line is
+		       a single option. Blank lines and lines that
+		       start with a hash are ignore.
 
+		       Here is an example that prunes .git and .repo
+		       files:
                            # Common options to prune common directories and
                            # disable warnings.
                            -p '\.git$|\.repo$'
                            -W
 
-                       When this file is read, it is exactly like specifying
-                       those options on the command line.
+		       When this file is read, it is exactly like
+		       specifying those options on the command line.
 
-                       Nested conf files can be specified but the program aborts
-                       if it finds nested references to the same conf file.
+		       Nested conf files can be specified but the
+		       program aborts if it finds nested references
+		       to the same conf file.
 
     -e REGEXP, --exclude REGEXP
-                       Exclude file if the name matches the regular expression.
-                       If multiple exclude criterion are specified, only one of
-                       them has to match (an OR operation).
-                       Here is an example that will exclude a file if its name
-                       contains either foo or bar:
+		       Exclude file if the name matches the regular
+		       expression.
+
+		       If multiple exclude criterion are specified,
+		       only one of them has to match (an OR operation).
+
+		       Here is an example that will exclude a file
+		       if its name contains either foo or bar:
                            $ %[1]v -e foo -e bar
 
     -E REGEXP, --Exclude REGEXP
-                       Exclude file if the name matches the regular expression.
-                       If multiple exclude criterion are specified, all of them
-                       have to match (an AND operation).
-                       Here is an example that will exclude a file if its name
-                       contains both foo and bar:
+		       Exclude file if the name matches the regular
+		       expression.
+
+		       If multiple exclude criterion are specified,
+		       all of them have to match (an AND operation).
+
+		       Here is an example that will exclude a file
+		       if its name contains both foo and bar:
                            $ %[1]v -E foo -E bar
                            test/fooonly
                            test/baronly
@@ -503,11 +533,14 @@ OPTIONS
     -h, --help         On-line help.
 
     -i REGEXP, --include REGEXP
-                       Include file if the name matches the regular expression.
-                       If multiple include criterion are specified, only one of
-                       them has to match (an OR operation).
-                       Here is an example that will include a file if its name
-                       contains either foo or bar:
+		       Include file if the name matches the regular
+		       expression.
+
+		       If multiple include criterion are specified,
+		       only one of them has to match (an OR operation).
+
+		       Here is an example that will include a file
+		       if its name contains either foo or bar:
                            $ %[1]v -i foo -i bar
                            test/fooonly
                            test/baronly
@@ -515,75 +548,97 @@ OPTIONS
                            test/nofoobar
 
     -I REGEXP, --Include REGEXP
-                       Include file if the name matches the regular expression.
-                       If multiple include criterion are specified, all of them
-                       have to match (an AND operation).
-                       Here is an example that will include a file if its name
-                       contains both foo and bar:
+		       Include file if the name matches the regular
+		       expression.
+
+		       If multiple include criterion are specified,
+		       all of them have to match (an AND operation).
+
+		       Here is an example that will include a file
+		       if its name contains both foo and bar:
                            $ %[1]v -i foo -i bar
                            test/foobar
                            test/nofoobar
 
     -l, --lines        Show the lines that match.
-                       If this is not specified, only the file names are shown.
+		       If this is not specified, only the file names
+		       are shown.
 
     -m INT, --max-depth INT
                        The maximum depth in the directory tree.
                        The top level is 0.
 
     -M INT, --max-jobs INT
-                       Maximum number of jobs (goroutines) to run in parallel.
-                       Each job is a file analysis.
+		       Maximum number of jobs (goroutines) to run
+		       in parallel. Each job is a file analysis.
                        The default is %[2]v.
 
     -n DATE/TIME, --newer-than DATE/TIME
-                       Only consider files that are newer than the date/time
-                       specification. The specification has a lot of options to
-                       make it simpler to use. See the DATE/TIME SPECIFICATION
-                       section for more details.
-                       Here is an example that looks for files that were
-                       modified in the last day:
+		       Only consider files that are newer than the
+		       date/time specification. The specification
+		       has a lot of options to make it simpler to
+		       use. See the DATE/TIME SPECIFICATION section
+		       for more details.
+
+		       Here is an example that looks for files that
+		       were modified in the last day:
                            $ %[1]v -n 1d
 
     -o DATE/TIME, --older-than DATE/TIME
-                       Only consider files that are older than the date/time
-                       specification. The specification has a lot of options to
-                       make it simpler to use. See the DATE/TIME SPECIFICATION
-                       section for more details.
-                       Here is an example that looks for files that have not
-                       been modified in the last week:
+		       Only consider files that are older than the
+		       date/time specification. The specification
+		       has a lot of options to make it simpler to
+		       use. See the DATE/TIME SPECIFICATION section
+		       for more details.
+
+		       Here is an example that looks for files that
+		       have not been modified in the last week:
                            $ %[1]v -o 1w
 
     -p REGEXP, --prune REGEXP
-                       Prune a directory if the path matches the regular
-                       expression. By default all directories are searched.
-                       The prune option can be used to significantly speed up
-                       analysis. It is typically used to ignore git repositories
-                       or directories that contain generated files like lib, bin
-                       or tmp. Here is an example:
+		       Prune a directory if the path matches the
+		       regular expression. By default all directories
+		       are searched.
+
+		       The prune option can be used to significantly
+		       speed up analysis. It is typically used to
+		       ignore git repositories or directories that
+		       contain generated files like lib, bin or
+		       tmp.
+
+		       Here is an example:
                            $ %[1]v -p '\.git$|^lib$|^bin$|^tmp$'
 
     -r REGEXP, --reject REGEXP
                        Reject if the contents match the regular expression.
-                       If multiple reject criterion are specified, only one of
-                       them has to match (an OR operation).
-                       Here is an example that will reject a file if it contains
-                       either foo or bar:
+		       If multiple reject criterion are specified,
+		       only one of them has to match (an OR operation).
+
+		       Here is an example that will reject a file
+		       if it contains either foo or bar:
                            $ %[1]v -r foo -r bar .
                            test/nofoobar
 
     -R REGEXP, --Reject REGEXP
                        Reject if the contents match the regular expression.
-                       If multiple reject criterion are specified, all of them
-                       have to match (an AND operation).
-                       Here is an example that will only reject a file if it
-                       contains both foo and bar:
+		       If multiple reject criterion are specified,
+		       all of them have to match (an AND operation).
+
+		       Here is an example that will only reject a
+		       file if it contains both foo and bar:
                            $ %[1]v -R foo -R bar .
                            test/fooonly
                            test/baronly
                            test/nofoobar
 
     -s, --summary      Print the summary report.
+
+    -S INIT MAX --scan-buf-params INIT MAX
+		       Set the internal scan buffer parameters to
+		       handle long lines like those in some log
+		       files. The defaults are 1048576 (1MB) and
+		       10485760 (10MB). These values normally do
+		       not need to be set.
 
     -v, --verbose      Increase the level of verbosity.
                        Can use -vv and -vvv as shorthand.
