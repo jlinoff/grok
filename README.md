@@ -6,7 +6,29 @@ Grep-like tool that searches for files that match regular expressions using conc
 Written in go.
 
 ## Installation
-Here is how you install it. You must have `go` and `make` in your path.
+There are three different types of installation described here: download the executable for linux,
+download the executable for Mac and build from source.
+
+### Download the Executable on Linux
+If you simply want the executable and are on a linux-64 platform, do this.
+
+```bash
+$ curl -L https://github.com/jlinoff/grok/releases/download/v0.8.3/grok-linux-amd64 --out grok
+$ chmod a+x grok
+$ ./grok -h
+```
+
+### Download the Executable on Mac
+If you simply want the executable and are on a recent MacOSX platform, do this.
+
+```bash
+$ curl -L https://github.com/jlinoff/grok/releases/download/v0.8.3/grok-darwin-amd64 --out grok
+$ chmod a+x grok
+$ ./grok -h
+```
+
+### Download and Build from Source
+Here is how to download and build from source. You must have `go` and `make` in your path.
 
 ```bash
 $ cd ~/work
@@ -187,7 +209,7 @@ Use `-l` to show the matching lines in the files.
 Use `-A` to make sure that all of the patterns occur in the same file to designate a match.
 
 ### Example 5
-Find which files use a constant called FOOBAT_SPAM. Ignore generated files.
+Find which files use a constant called FOOBAR_SPAM. Ignore generated files.
 Prune directories that contain generated files or repository files.
 
 ```bash
