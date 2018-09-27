@@ -69,23 +69,26 @@ func loadCliOptions() (opts cliOptions) {
 	// it.
 	cache := make([]string, 0)
 	args := append([]string{}, os.Args...)
-	for i := 1; i < len(args); i++ {
-		arg := args[i]
+	for i := 1; i < len(args) || len(cache) != 0; i++ {
+		var arg string
 		if len(cache) > 0 {
 			// There are still single arguments in the cache,
 			// handle them first.
 			i--            // backup for the next round.
 			arg = cache[0] // populate arg from the cache
 			cache = cache[1:]
-		} else if len(arg) > 2 && arg[0] == '-' && arg[1] != '-' {
-			// Update the cache.
-			// This allows spefications like:
-			//   -CWla 'pattern'
-			for j := 2; j < len(arg); j++ {
-				newArg := fmt.Sprintf("-%c", arg[j])
-				cache = append(cache, newArg)
+		} else {
+			arg = args[i]
+			if len(arg) > 2 && arg[0] == '-' && arg[1] != '-' {
+				// Update the cache.
+				// This allows spefications like:
+				//   -CWla 'pattern'
+				for j := 2; j < len(arg); j++ {
+					newArg := fmt.Sprintf("-%c", arg[j])
+					cache = append(cache, newArg)
+				}
+				arg = arg[:2] // grab the first option
 			}
-			arg = arg[:2] // grab the first option
 		}
 		switch arg {
 		case "-a", "--accept":

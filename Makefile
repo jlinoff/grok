@@ -36,9 +36,7 @@ install:
 	@echo
 
 clean:
-	rm -rf test/*/test *log bin
-	find . -name '*~' -delete
-	find . -name '*log' -delete
+	git clean -f -d -x .
 
 bundle:
 	$(TAR_EXE) -J -c -f $$(basename $$(pwd))-src.tar.xz \
@@ -53,4 +51,3 @@ edit:
 
 test:
 	@cd test && ./test.sh 2>&1 | tee test.log
-
