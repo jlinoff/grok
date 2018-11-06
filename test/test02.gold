@@ -1,7 +1,10 @@
-2018/04/24 12:56:21 INFO       32 - version: grok v0.6.1
-2018/04/24 12:56:21 INFO       33 - cmdline: ../bin/grok -M 1 -s -v -l -e '.*\.log$' -p '/src/github.com$|/src/golang.org$|/test$|/tmp$|\.git$' -a '\bmain\b' ..
+2018/11/06 11:29:12 INFO       32 - version: grok v0.9.0
+2018/11/06 11:29:12 INFO       33 - cmdline: ../bin/grok -M 1 -s -v -l -e '.*\.log$' -p '/src/github.com$|/src/golang.org$|/test$|/tmp$|\.git$' -a '\bmain\b' ..
 ../README.md
-     166 | Find all source files that have main and reference a macro called FOOBAR.
+     197 | Find all source files that have main and reference a macro called FOOBAR.
+../src/jlinoff/grok/help.go
+       2 | package main
+     353 |     # Example 4: Find all source files that have main and reference a macro
 ../src/jlinoff/grok/main.go
        1 | package main
       30 | func main() {
@@ -9,11 +12,10 @@
        1 | package main
 ../src/jlinoff/grok/options.go
        2 | package main
-     594 |     # Example 4: Find all source files that have main and reference a macro
 
-summary: files tested :       44
-summary: files matched:        4
-summary: lines matched:        6
-2018/04/24 12:56:21 INFO       61 - files matched:        4
-2018/04/24 12:56:21 INFO       62 - lines matched:        6
-2018/04/24 12:56:21 INFO       63 - done
+summary: files tested :       49
+summary: files matched:        5
+summary: lines matched:        7
+2018/11/06 11:29:12 INFO       61 - files matched:        5
+2018/11/06 11:29:12 INFO       62 - lines matched:        7
+2018/11/06 11:29:12 INFO       63 - done

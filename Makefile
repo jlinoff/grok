@@ -46,7 +46,13 @@ bundle:
 		Makefile LICENSE README.md
 	@ls -l $$(basename $$(pwd))-src.tar.xz
 
+# This is a custom rule for firing up atom on my Mac.
 edit:
+	@if [[ $$(uname) == "Darwin" ]] ; then \
+		echo "installing dlv" ; \
+		GOPATH=$$(pwd) go get -u github.com/derekparker/delve/cmd/dlv ; \
+	fi
+	@echo "starting atom"
 	GOPATH=$$(pwd) /opt/atom/latest/Atom.app/Contents/MacOS/Atom
 
 test:
