@@ -1,0 +1,12 @@
+
+a1 = "double quoted string"
+a2 = "double quoted string with \"embedded quote\""
+a3 = "one double quoted string" + "another double quoted string"
+
+# "double quoted string in comment"
+
+b1 = 'single quoted string'
+b2 = 'single quoted string with \'embedded quote\''
+b3 = 'one single quoted string' + 'another single quoted string'
+
+# 'single quoted string in comment'

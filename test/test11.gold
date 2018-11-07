@@ -1,0 +1,7 @@
+[1mtest11.txt[0m
+[38;5;245m       2 | [0ma1 = [31;1m"double quoted string"[0m
+[38;5;245m       3 | [0ma2 = [31;1m"double quoted string with \"embedded quote\""[0m
+[38;5;245m       4 | [0ma3 = [31;1m"one double quoted string" + "another double quoted string"[0m
+[38;5;245m       8 | [0mb1 = [31;1m'single quoted string'[0m
+[38;5;245m       9 | [0mb2 = [31;1m'single quoted string with \'embedded quote\''[0m
+[38;5;245m      10 | [0mb3 = [31;1m'one single quoted string' + 'another single quoted string'[0m

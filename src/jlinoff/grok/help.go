@@ -135,7 +135,7 @@ OPTIONS
                            test/baronly
                            test/foobar
 
-    -A REGEXP, --Accept REGEXP
+    -A REGEXP, --Accept REGEXP, --ACCEPT REGEXP
                        Accept if the contents match the regular
                        expression.
 
@@ -189,6 +189,36 @@ OPTIONS
                        to the same conf file.
 
     --color            Colorize the output using ANSI escape sequences.
+
+    -d REGEXP, --delete REGEXP
+                       Delete accepted entries if the contents match
+                       the regular expression. This is extremely
+                       useful because it allows single line matches to
+                       be excluded.
+
+                       If multiple delete criterion are specified,
+                       only one of them has to match (an OR operation).
+
+                       Here is an example that will accept a file
+                       if it contains either foo or bar but not spam
+                       on the same line:
+                           $ %[1]v -a foo -a bar -d spam
+                           test/fooonly
+                           test/baronly
+                           test/foobar
+
+    -D REGEXP, --Delete REGEXP, --DELETE REGEXP
+                       Delete accepted entries if the contents match
+                       the regular expression.
+
+                       If multiple delete criterion are specified,
+                       all of them have to match (an AND operation).
+
+                       Here is an example that will only accept a
+                       file if it contains both foo and bar but not
+                       spam and wombat on the same line:
+                           $ %[1]v -A foo -A bar -D spam -D wombat
+                           test/foobar
 
     -e REGEXP, --exclude REGEXP
                        Exclude file if the name matches the regular
@@ -252,6 +282,8 @@ OPTIONS
     -m INT, --max-depth INT
                        The maximum depth in the directory tree.
                        The top level is 0.
+                       The default is no maximum (0). All
+                       subdirectories are processed.
 
     -M INT, --max-jobs INT
                        Maximum number of jobs (goroutines) to run
@@ -389,6 +421,15 @@ EXAMPLES
 
     # Example 11: Use another tool (find) to pre-select files.
     $ %[1]v -CWlyza 1 5 'def foo.*$' $(find . -type f -name '*.c' -o -name '*.h')
+
+    # Example 12: Find all double and single quoted strings in C source files.
+    #             It is not perfect, it will find quoted strings in
+    #             long comments but it is a decent start.
+    #             Note the use of the -d option to prune single
+    #             line comments, pragmas and other artifacts. This
+    #             allows lines like this to be ignored:
+    #                // this contains "a quoted string"
+    $ %[1]v -CWl -a '"([^\\"]|.)*"' -a "'([^\\']|.)*'" -d '^\s*/\*|^\s*\*|^\s*#|^\s*//|\*/' -i '\.[ch]$'
 
 COPYRIGHT:
    Copyright (c) 2017 Joe Linoff, all rights reserved

@@ -31,6 +31,8 @@ type cliOptions struct {
 	CmdLine            string
 	Colorize           bool // --color
 	Dirs               []string
+	DeleteAndPatterns  []*regexp.Regexp // -D
+	DeleteOrPatterns   []*regexp.Regexp // -d
 	ExcludeAndPatterns []*regexp.Regexp // -E
 	ExcludeOrPatterns  []*regexp.Regexp // -i
 	IncludeAndPatterns []*regexp.Regexp // -I
@@ -107,6 +109,10 @@ func loadCliOptions() (opts cliOptions) {
 			readOptsConfFile(&i, &args, confMap)
 		case "-C", "--color", "--colorize":
 			opts.Colorize = true
+		case "-d", "--delete":
+			opts.DeleteOrPatterns = append(opts.DeleteOrPatterns, cliGetNextArgRegexp(&i, args))
+		case "-D", "--Delete", "--DELETE":
+			opts.DeleteAndPatterns = append(opts.DeleteAndPatterns, cliGetNextArgRegexp(&i, args))
 		case "-e", "--exclude":
 			opts.ExcludeOrPatterns = append(opts.ExcludeOrPatterns, cliGetNextArgRegexp(&i, args))
 		case "-E", "--Exclude", "--EXCLUDE":

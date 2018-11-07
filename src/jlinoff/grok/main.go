@@ -155,11 +155,15 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 		return
 	}
 
-	// Create the AND tables for accept and reject.
+	// Create the AND tables for accept, delete and reject.
 	aa := []bool{}
+	da := []bool{}
 	ra := []bool{}
 	if len(opts.AcceptAndPatterns) > 0 {
 		aa = make([]bool, len(opts.AcceptAndPatterns))
+	}
+	if len(opts.DeleteAndPatterns) > 0 {
+		da = make([]bool, len(opts.DeleteAndPatterns))
 	}
 	if len(opts.RejectAndPatterns) > 0 {
 		ra = make([]bool, len(opts.RejectAndPatterns))
@@ -175,8 +179,10 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 	matchedLines := []int{}
 	fileRejected := false
 	fileAllAndAccepted := false
+	fileAllAndDeleted := false
 	fileAnyOrAccepted := false
 	var aa1 bool // accept any for an AND condition (partial match)
+	var da1 bool // delete accept any for an AND condition (partial match)
 
 	before := make([][]string, 0)
 	after := make([][]string, 0)
@@ -190,20 +196,36 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 		infov3(opts, "   reject all : %v", ra1)
 		infov3(opts, "   reject any : %v", ro1)
 
-		// Any rejection, aborts.
+		// Any rejection, abort this file.
 		if ra1 == true || ro1 == true {
 			fileRejected = true
 			break
 		}
 
-		// Check accept patterns.
+		// Check accept AND patterns.
 		// That can occur for a partial match on the AND conditions or
 		// any match for the OR conditions.
 		fileAllAndAccepted, aa1 = checkAndConditions(line, opts.AcceptAndPatterns, &aa)
+
+		// Accept OR paatterns.
 		ao1 := checkOrConditions(line, opts.AcceptOrPatterns)
 
 		infov3(opts, "   accept all : %v", fileAllAndAccepted)
 		infov3(opts, "   accept any : %v %v", ao1, aa1)
+
+		// Delete accepted patterns if there are delete matches.
+		fileAllAndDeleted, da1 = checkAndConditions(line, opts.DeleteAndPatterns, &da)
+		do1 := checkOrConditions(line, opts.DeleteOrPatterns)
+		infov3(opts, "   delete all : %v", fileAllAndDeleted)
+		infov3(opts, "   delete any : %v", do1, da1)
+		if fileAllAndDeleted == true || do1 == true {
+			// The delete won out.
+			fileAllAndAccepted = false
+			aa1 = false
+			ao1 = false
+		}
+
+		// Set the accept any flag.
 		if fileAnyOrAccepted == false {
 			fileAnyOrAccepted = ao1
 		}
