@@ -1,10 +1,10 @@
-// Help message.
+// BUG: // Help message.
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"fmt"
 	"runtime"
 )
 
@@ -279,6 +279,18 @@ OPTIONS
                        are shown. It is useful when using the tool
                        interactively.
 
+    -L, --Lines        Show the lines that match in raw form.
+                       This is very similar to -l except that the
+                       file names and line number prefixes are not
+                       shown. It is useful when using the tool to find
+                       out global characteristices of the system in
+                       conjunction with other filters. For example,
+                       trying to find all of the unique imports (or
+                       includes) in a system.
+
+                       If both -L and -l are specified, a warning is
+                       generated and -L is ignored.
+
     -m INT, --max-depth INT
                        The maximum depth in the directory tree.
                        The top level is 0.
@@ -434,6 +446,16 @@ EXAMPLES
     #             allows lines like this to be ignored:
     #                // this contains "a quoted string"
     $ %[1]v -CWl -a '"([^\\"]|.)*"' -a "'([^\\']|.)*'" -d '^\s*/\*|^\s*\*|^\s*#|^\s*//|\*/' -i '\.[ch]$'
+
+    # Example 13: Use -L to find all unique python properties in a system.
+    #             Note that -C is not specified because colorizing
+    #             inserts affects the sed operation.
+    $ %[1]v -WLa '^\s*@' -i '\.py$' | sed -e 's/^[[:space:]]*@/@/g' | sort -fu | cat -n
+
+    # Example 14: Use -L to find all unique includes in a system.
+    #             Note that -C is not specified because colorizing
+    #             inserts affects the sed operation.
+    $ %[1]v -WLa '^\s*#\s+include\s' -i '\.[ch]$' | sed -e 's/^[[:space:]]*@/@/g' -e 's/^#[[:space:]]*include/#include/' | sort -fu | cat -n
 
 COPYRIGHT:
    Copyright (c) 2017 Joe Linoff, all rights reserved

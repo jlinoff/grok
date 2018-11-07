@@ -11,7 +11,7 @@ import (
 )
 
 // program version
-var version = "v0.9.0"
+var version = "v0.9.1"
 
 // Local reporting stats
 type findStats struct {
@@ -216,7 +216,7 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 			fileAllAndDeleted, da1 = checkAndConditions(line, opts.DeleteAndPatterns, &da)
 			do1 := checkOrConditions(line, opts.DeleteOrPatterns)
 			infov3(opts, "   delete all : %v", fileAllAndDeleted)
-			infov3(opts, "   delete any : %v", do1, da1)
+			infov3(opts, "   delete any : %v %v", do1, da1)
 			if fileAllAndDeleted == true || do1 == true {
 				// The delete won out.
 				fileAllAndAccepted = false
@@ -270,12 +270,15 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 		matched = true
 		fs.FilesMatched++
 		fs.LinesMatched += int64(len(matchedLines))
-		if opts.Colorize {
-			fmt.Printf("\033[1m%v\033[0m\n", path)
-		} else {
-			fmt.Printf("%v\n", path)
+		if opts.Lines != RawLines {
+			// Do not print the file name for raw lines.
+			if opts.Colorize {
+				fmt.Printf("\033[1m%v\033[0m\n", path)
+			} else {
+				fmt.Printf("%v\n", path)
+			}
 		}
-		if opts.Lines {
+		if opts.Lines != NoLines {
 			for m, i := range matchedLines {
 				lineno := i + 1
 				line := lines[i]
@@ -299,10 +302,18 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 
 				// Line.
 				if opts.Colorize {
-					fmt.Printf("\033[38;5;245m%8d | \033[0m%v", lineno, colorizeLine(opts, line))
+					if opts.Lines == DecoratedLines {
+						fmt.Printf("\033[38;5;245m%8d | \033[0m%v", lineno, colorizeLine(opts, line))
+					} else if opts.Lines == RawLines {
+						fmt.Printf("%v", colorizeLine(opts, line))
+					}
 					printNewline(line)
 				} else {
-					fmt.Printf("%8d | %v", lineno, line)
+					if opts.Lines == DecoratedLines {
+						fmt.Printf("%8d | %v", lineno, line)
+					} else if opts.Lines == RawLines {
+						fmt.Printf("%v", line)
+					}
 					printNewline(line)
 				}
 

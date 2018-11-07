@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Test options parsing for trailing condensed options.
+# Test options for parsing for trailing condensed options.
 #
 
 # ================================================================

@@ -20,6 +20,14 @@ type cliDatetime struct {
 	Value time.Time
 }
 
+// Line reporting.
+type LineReportingType int
+const (
+	NoLines LineReportingType = iota + 1 // No lines are reported
+	DecoratedLines	// Lines have a line number prefix, file names are reported.
+	RawLines // Just the lines are reported.
+)
+
 // command line options
 type cliOptions struct {
 	AcceptAndPatterns  []*regexp.Regexp // -A
@@ -37,7 +45,7 @@ type cliOptions struct {
 	ExcludeOrPatterns  []*regexp.Regexp // -i
 	IncludeAndPatterns []*regexp.Regexp // -I
 	IncludeOrPatterns  []*regexp.Regexp // -i
-	Lines              bool             // -l
+	Lines              LineReportingType // -l, -L
 	MaxDepth           int              // -m
 	MaxJobs            int              // -M
 	NewerThan          time.Time        // -n
@@ -63,6 +71,7 @@ func loadCliOptions() (opts cliOptions) {
 	opts.MaxJobs = runtime.NumCPU()
 	opts.ScanBufInitSize = 1024 * 1024
 	opts.ScanBufMaxSize = 10 * opts.ScanBufInitSize
+	opts.Lines = NoLines
 
 	// Used to detect nested conf files.
 	confMap := map[string]string{}
@@ -124,7 +133,9 @@ func loadCliOptions() (opts cliOptions) {
 		case "-I", "--Include", "--INCLUDE":
 			opts.IncludeAndPatterns = append(opts.IncludeAndPatterns, cliGetNextArgRegexp(&i, args))
 		case "-l", "--lines":
-			opts.Lines = true
+			opts.Lines = DecoratedLines
+		case "-L", "--Lines", "--LINES":
+			opts.Lines = RawLines
 		case "-m", "--max-depth":
 			opts.MaxDepth = cliGetNextArgInt(&i, args)
 		case "-M", "--max-jobs":
