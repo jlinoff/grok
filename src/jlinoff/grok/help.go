@@ -326,6 +326,10 @@ OPTIONS
                        Here is an example:
                            $ %[1]v -p '\.git$|^lib$|^bin$|^tmp$'
 
+                       Multi-level directories can be specified as
+                       well. Here is an example of that:
+                           $ %[1]v -p 'project1/lib|project1/bin|project1/tools'
+
     -r REGEXP, --reject REGEXP
                        Reject if the contents match the regular expression.
                        If multiple reject criterion are specified,

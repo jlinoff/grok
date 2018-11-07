@@ -67,14 +67,15 @@ regular expressions.
 
 | #   | Test     | Target    | Options  | Action |
 | --: | -------- | --------- | -------- | ------ |
-| 1   | accept   | contents  | -a, -A   | Accept a file if the contents match REs. |
-| 2   | reject   | contents  | -r, -R   | Reject a file if the contents match REs. |
+| 1   | accept   | contents  | -a, -A   | Accept a file if any of the line contents match REs. |
+| 2   | reject   | contents  | -r, -R   | Reject a file if any of the line contents match REs. |
 | 3   | include  | name      | -i, -I   | Include a file if the file name matches REs. |
 | 4   | exclude  | name      | -e, -E   | Exclude a file if the file name matches REs. |
 | 5   | newer    | date/time | -n       | Accept a file if it is newer than a date/time. |
 | 6   | older    | date/time | -o       | Accept a file if it is older than a date/time. |
 | 7   | maxdepth | depth     | -m       | Exclude files deeper than the depth. |
 | 8   | prune    | name      | -p       | Exclude a directory if the path matched REs. |
+| 9   | delete   | contents  | -d, -D   | Delete an accepted line if contents match REs. |
 
 You can specify whether a file must match all criteria (AND) or any criteria
 (OR). In the table above, you can see that with the options that are lower and upper case.
@@ -90,7 +91,7 @@ You can also specify information to help you get some context information.
 A simple example should make all this a bit clearer. You want to search your
 python, java and C source files to see which ones do not have a copyright
 notice. The copy right notice has a very specific form:
-    
+
     Copyright (c) YEARS by Acme Inc., all rights reserved
 
 The YEARS is a list of years that is a comma or dash separated list of
@@ -129,7 +130,7 @@ files that have been modified in the last week you would specify `-n 1w` or
 `-n 7d`.
 
  The table below lists the suffixes.
- 
+
 | Suffix | Duration | Example  |
 | :----: | -------- | -------- |
 | s      | seconds  | `-n 30s` |
@@ -137,7 +138,7 @@ files that have been modified in the last week you would specify `-n 1w` or
 | h      | hours    | `-n 12h` |
 | d      | days     | `-n 3d`  |
 | w      | weeks    | `-n 2w`  |
- 
+
 If no suffix is specified, seconds are assumed.
 
 You can search time windows by using both options. Here is an example that
@@ -281,8 +282,15 @@ $ grok -CWlyza 5 4 'error:|fatal:' /foo/bar /spam/wombat/blatz
 
 Note that `y` is the same as `--before` and `z` is the same `--after`. These options and `-C` were added in v0.7.0.
 
+### Example 9
+Find all of the singly and doubly quoted strings that are fully contained on a single line.
+Ignore lines that start with a `#` or `//`.
+Note the use of the `-d` option that was introduced in v0.9.
+```bash
+$ grok -CWl -a '"([^\\\"]|.)*"' -a "'([^\\']|.)*'" -d '^\s*#|^\s*//'
+```
+
 ## Epilogue
 I hope that you find this tool as useful as I have.
 
 Comments or suggestions for improving/fixing it are greatly appreciated.
-
