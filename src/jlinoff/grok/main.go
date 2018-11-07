@@ -206,23 +206,23 @@ func checkFile(opts cliOptions, path string, stat os.FileInfo, fs *findStats) {
 		// That can occur for a partial match on the AND conditions or
 		// any match for the OR conditions.
 		fileAllAndAccepted, aa1 = checkAndConditions(line, opts.AcceptAndPatterns, &aa)
-
-		// Accept OR paatterns.
 		ao1 := checkOrConditions(line, opts.AcceptOrPatterns)
 
 		infov3(opts, "   accept all : %v", fileAllAndAccepted)
 		infov3(opts, "   accept any : %v %v", ao1, aa1)
 
 		// Delete accepted patterns if there are delete matches.
-		fileAllAndDeleted, da1 = checkAndConditions(line, opts.DeleteAndPatterns, &da)
-		do1 := checkOrConditions(line, opts.DeleteOrPatterns)
-		infov3(opts, "   delete all : %v", fileAllAndDeleted)
-		infov3(opts, "   delete any : %v", do1, da1)
-		if fileAllAndDeleted == true || do1 == true {
-			// The delete won out.
-			fileAllAndAccepted = false
-			aa1 = false
-			ao1 = false
+		if fileAllAndAccepted == true || aa1 == true || ao1 == true {
+			fileAllAndDeleted, da1 = checkAndConditions(line, opts.DeleteAndPatterns, &da)
+			do1 := checkOrConditions(line, opts.DeleteOrPatterns)
+			infov3(opts, "   delete all : %v", fileAllAndDeleted)
+			infov3(opts, "   delete any : %v", do1, da1)
+			if fileAllAndDeleted == true || do1 == true {
+				// The delete won out.
+				fileAllAndAccepted = false
+				aa1 = false
+				ao1 = false
+			}
 		}
 
 		// Set the accept any flag.
