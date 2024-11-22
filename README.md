@@ -9,6 +9,12 @@ Written in go.
 There are three different types of installation described here: download the executable for linux,
 download the executable for Mac and build from source.
 
+### Install via Go
+
+```
+go install github.com/jlinoff/grok/src/jlinoff/grok@latest
+```
+
 ### Download the Executable on Linux
 If you simply want the executable and are on a linux-64 platform, do this.
 
